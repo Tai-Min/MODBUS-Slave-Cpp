@@ -425,6 +425,7 @@ void MODBUS_Slave::event()
     uint16_t computedcrc = crc(command, commandLength);
     if (givencrc != computedcrc)
     {
+        Serial.flush();
         return;
     }
 
@@ -472,7 +473,6 @@ void MODBUS_Slave::event()
     default:
         uint8_t tab[3] = {command[MODBUS_ID], toError(command[MODBUS_FUNCTION]), MODBUS_ERR_ILLEGAL_FUNCTION};
         sendData(tab, 3);
-        Serial.flush();
         break;
     }
 
