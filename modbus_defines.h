@@ -1,13 +1,12 @@
+#ifndef MODBUS_DEFINES_H
+#define MODBUS_DEFINES_H
+
+#include <HardwareSerial.h>
+
 #define MODBUS_BYTE 8
-
 #define MODBUS_ID_BROADCAST 0
-
-#define MODBUS_CRC 0x4B37
 #define MODBUS_CRC_BYTE_COUNT 2
-
-#ifndef MODBUS_FRAME_LENGTH 
-#define MODBUS_MAX_FRAME_SIZE 256
-#endif
+#define MODBUS_MAX_FRAME_SIZE SERIAL_RX_BUFFER_SIZE
 
 //byte position in request frame
 #define MODBUS_ID 0
@@ -37,3 +36,5 @@
 #define MODBUS_ERR_ILLEGAL_ADDR 2
 #define MODBUS_ERR_ILLEGAL_DATA 3
 #define MODBUS_ERR_SLAVE_FAILURE 4
+
+#endif

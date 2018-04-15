@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "modbus_defines.h"
 
-class MODBUS_Slave
+class MSlave
 {
   private:
     static uint8_t id;
@@ -33,6 +33,8 @@ class MODBUS_Slave
     static void writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL);
     static void writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
     static void writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
+
+    MSlave(){};
 
   public:
     static void init(uint8_t id_, HardwareSerial *S_, uint16_t *AQ_, int AQs, bool *DQ_, int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs);

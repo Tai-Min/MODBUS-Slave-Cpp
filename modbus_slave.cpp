@@ -1,43 +1,43 @@
 #include "modbus_slave.h"
 
-uint8_t MODBUS_Slave::id;
-bool MODBUS_Slave::active = 0;
+uint8_t MSlave::id;
+bool MSlave::active = 0;
 
-int MODBUS_Slave::AQSize;
-int MODBUS_Slave::DQSize;
-int MODBUS_Slave::AISize;
-int MODBUS_Slave::DISize;
+int MSlave::AQSize;
+int MSlave::DQSize;
+int MSlave::AISize;
+int MSlave::DISize;
 
-HardwareSerial *MODBUS_Slave::S;
+HardwareSerial *MSlave::S;
 
 //memory map
-uint16_t *MODBUS_Slave::AQ = nullptr;
-bool *MODBUS_Slave::DQ = nullptr;
-uint16_t *MODBUS_Slave::AI = nullptr;
-bool *MODBUS_Slave::DI = nullptr;
+uint16_t *MSlave::AQ = nullptr;
+bool *MSlave::DQ = nullptr;
+uint16_t *MSlave::AI = nullptr;
+bool *MSlave::DI = nullptr;
 
-uint8_t MODBUS_Slave::toError(uint8_t code)
+uint8_t MSlave::toError(uint8_t code)
 {
     return code + MODBUS_ERR_OFFSET;
 }
 
-uint16_t MODBUS_Slave::toWord(uint8_t H, uint8_t L)
+uint16_t MSlave::toWord(uint8_t H, uint8_t L)
 {
     return ((uint16_t)H << MODBUS_BYTE) | L;
 }
 
-uint8_t MODBUS_Slave::toHighByte(uint16_t word)
+uint8_t MSlave::toHighByte(uint16_t word)
 {
     return (word >> MODBUS_BYTE);
 }
 
-uint8_t MODBUS_Slave::toLowByte(uint16_t word)
+uint8_t MSlave::toLowByte(uint16_t word)
 {
     return word;
 }
 
 //https://stackoverflow.com/questions/19347685/calculating-modbus-rtu-crc-16
-uint16_t MODBUS_Slave::crc(uint8_t command[], uint8_t commandLength)
+uint16_t MSlave::crc(uint8_t command[], uint8_t commandLength)
 {
     uint16_t crc = 0xFFFF;
     for (uint8_t pos = 0; pos < commandLength; pos++)
@@ -59,7 +59,7 @@ uint16_t MODBUS_Slave::crc(uint8_t command[], uint8_t commandLength)
     return crc;
 }
 
-void MODBUS_Slave::sendData(uint8_t tab[], uint8_t length)
+void MSlave::sendData(uint8_t tab[], uint8_t length)
 {
     if (tab[MODBUS_ID] == MODBUS_ID_BROADCAST)
         return; //do not send anything for broadcast
@@ -76,7 +76,7 @@ void MODBUS_Slave::sendData(uint8_t tab[], uint8_t length)
     S->write(hcrc);
 }
 
-void MODBUS_Slave::readOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
+void MSlave::readOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
 {
     if (id == MODBUS_ID_BROADCAST)
         return;
@@ -128,7 +128,7 @@ void MODBUS_Slave::readOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t
     return;
 }
 
-void MODBUS_Slave::readInputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
+void MSlave::readInputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
 {
     if (id == MODBUS_ID_BROADCAST)
         return;
@@ -180,7 +180,7 @@ void MODBUS_Slave::readInputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t 
     return;
 }
 
-void MODBUS_Slave::readOutputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
+void MSlave::readOutputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
 {
     if (id == MODBUS_ID_BROADCAST)
         return;
@@ -223,7 +223,7 @@ void MODBUS_Slave::readOutputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL,
     return;
 }
 
-void MODBUS_Slave::readInputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
+void MSlave::readInputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL)
 {
     if (id == MODBUS_ID_BROADCAST)
         return;
@@ -266,7 +266,7 @@ void MODBUS_Slave::readInputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, 
     return;
 }
 
-void MODBUS_Slave::writeOutput(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL)
+void MSlave::writeOutput(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL)
 {
     uint16_t addr = toWord(addrH, addrL);
 
@@ -290,7 +290,7 @@ void MODBUS_Slave::writeOutput(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t
     return;
 }
 
-void MODBUS_Slave::writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL)
+void MSlave::writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL)
 {
     uint16_t addr = toWord(addrH, addrL);
     uint16_t val = toWord(valH, valL);
@@ -309,7 +309,7 @@ void MODBUS_Slave::writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     return;
 }
 
-void MODBUS_Slave::writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength)
+void MSlave::writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength)
 {
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
@@ -351,7 +351,7 @@ void MODBUS_Slave::writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     return;
 }
 
-void MODBUS_Slave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength)
+void MSlave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength)
 {
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
@@ -386,7 +386,7 @@ void MODBUS_Slave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uin
     return;
 }
 
-void MODBUS_Slave::init(uint8_t id_, HardwareSerial *S_, uint16_t *AQ_, int AQs, bool *DQ_, int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs)
+void MSlave::init(uint8_t id_, HardwareSerial *S_, uint16_t *AQ_, int AQs, bool *DQ_, int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs)
 {
     if (id_ == 0 || id_ > 247)
         return;
@@ -418,7 +418,7 @@ void MODBUS_Slave::init(uint8_t id_, HardwareSerial *S_, uint16_t *AQ_, int AQs,
     active = 1;
 }
 
-void MODBUS_Slave::event()
+void MSlave::event()
 {
     uint8_t command[MODBUS_MAX_FRAME_SIZE]; //should be bigger probably (The maximum size of a MODBUS RTU frame is 256 bytes. - MODBUS over Serial Line  Specification and Implementation Guide  V1.02)
     uint8_t commandLength = S->readBytes(command, MODBUS_MAX_FRAME_SIZE);
