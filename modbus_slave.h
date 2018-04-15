@@ -10,6 +10,11 @@ class MSlave
     static uint8_t id;
     static bool active;
 
+    static uint16_t *AQ;
+    static bool *DQ;
+    static uint16_t *AI;
+    static bool *DI;
+
     static int AQSize;
     static int DQSize;
     static int AISize;
@@ -39,11 +44,6 @@ class MSlave
   public:
     static void init(uint8_t id_, HardwareSerial *S_, uint16_t *AQ_, int AQs, bool *DQ_, int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs);
     static void event();
-
-    static uint16_t *AQ;
-    static bool *DQ;
-    static uint16_t *AI;
-    static bool *DI;
 };
 
 #endif
