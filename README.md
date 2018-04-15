@@ -36,41 +36,45 @@ Reading status of led 13: <br />
 + 0 6 are two bytes of address to our coil which is 6
 + 0 1 are two bytes of quantity of inputs to be read which is 1
 ```
-#include "modbus_slave.h"
+#include "mslave.h"
 
 int ledPin = 13;
 
 int deviceID = 1;
-const int AQSize = 10;
+const int AQSize = 10;//randomly chosen array sizes just for this example 
 const int AISize = 8;
 const int DQSize = 5;
 const int DISize = 12;
 
 uint16_t AQ[AQSize];//holding registers
 uint16_t AI[AISize];//input registers
-bool DQ[DQSize];//coils
-bool DI[DISize];//inputs
+bool DQ[DQSize];    //coils
+bool DI[DISize];    //inputs
+
+MSlave slave;
 
 void setup()
 {
   pinMode(ledPin,OUTPUT);
-  MSlave::init(deviceID, &Serial, AQ, AQSize, DQ, DQSize, AI, AISize, DI, DISize);//initialization of MODBUS server
+  
+  slave.setId(deviceID);
+  slave.setCoils(DQ, DQSize);
+  slave.setInputs(DI, DISize);
+  slave.setHoldingRegisters(AQ, AQSize);//this example does not use holding registers nor input registers
+  slave.setInputRegisters(AI, AISize);  //but added these just to show corresponding functions
+  slave.setSerial(&Serial);
   Serial.begin(115200, SERIAL_8E1);//serial with 8 bits of data, even parity and one stop bit
-  //Even parity is required, other modes ( odd parity, no parity ) may also be used. In order to ensure a maximum compatibility with
+  //"Even parity is required, other modes ( odd parity, no parity ) may also be used. In order to ensure a maximum compatibility with
   //other products, it is recommended to support also No parity mode. The default parity mode must be even parity.
-  //Remark : the use of no parity requires 2 stop bits.
+  //Remark : the use of no parity requires 2 stop bits."
   //source: MODBUS over Serial Line Specification and Implementation Guide V1.02
 }
 
 void loop()
 {
-  digitalWrite(ledPin, DQ[0]);
-  DI[6] = digitalRead(ledPin);
-}
-
-void serialEvent()
-{
-  MSlave::event();//react to incoming frame
+    slave.event();
+    digitalWrite(ledPin, DQ[0]);
+    DI[6] = digitalRead(ledPin);
 }
 ```
 
