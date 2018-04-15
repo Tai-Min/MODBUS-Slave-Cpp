@@ -6,7 +6,7 @@
 #define MODBUS_CRC_BYTE_COUNT 2
 
 #ifndef MODBUS_FRAME_LENGTH 
-#define MODBUS_FRAME_LENGTH 64
+#define MODBUS_MAX_FRAME_SIZE 256
 #endif
 
 //byte position in request frame
@@ -29,33 +29,6 @@
 #define MODBUS_WRITE_REGISTER 6
 #define MODBUS_WRITE_N_OUTPUTS 0x0F
 #define MODBUS_WRITE_N_REGISTERS 0x10
-
-//storage defines
-#ifndef MODBUS_AQ_LENGTH
-#error missing MODBUS_AQ_LENGTH
-#endif
-
-#ifndef MODBUS_DQ_LENGTH
-#error missing MODBUS_DQ_LENGTH
-#endif
-
-#ifndef MODBUS_AI_LENGTH
-#error missing MODBUS_AI_LENGTH
-#endif
-
-#ifndef MODBUS_DI_LENGTH
-#error missing MODBUS_DI_LENGTH
-#endif
-
-#define MODBUS_AQ_FIRST_ADDR 0
-#define MODBUS_DQ_FIRST_ADDR 0
-#define MODBUS_AI_FIRST_ADDR 0
-#define MODBUS_DI_FIRST_ADDR 0
-
-#define MODBUS_AQ_LAST_ADDR MODBUS_AQ_LENGTH-1
-#define MODBUS_DQ_LAST_ADDR MODBUS_DQ_LENGTH-1
-#define MODBUS_AI_LAST_ADDR MODBUS_AI_LENGTH-1
-#define MODBUS_DI_LAST_ADDR MODBUS_DI_LENGTH-1
 
 #define MODBUS_ERR_OFFSET 0x80
 

@@ -1,13 +1,18 @@
 #include "modbus_slave.h"
 
-int MODBUS_Slave::id;
+uint8_t MODBUS_Slave::id;
 bool MODBUS_Slave::active = 0;
 
+int MODBUS_Slave::AQSize;
+int MODBUS_Slave::DQSize;
+int MODBUS_Slave::AISize;
+int MODBUS_Slave::DISize;
+
 //memory map
-uint16_t MODBUS_Slave::AQ[MODBUS_AQ_LENGTH];
-bool MODBUS_Slave::DQ[MODBUS_DQ_LENGTH];
-uint16_t MODBUS_Slave::AI[MODBUS_AI_LENGTH];
-bool MODBUS_Slave::DI[MODBUS_DI_LENGTH];
+uint16_t *MODBUS_Slave::AQ = nullptr;
+bool *MODBUS_Slave::DQ = nullptr;
+uint16_t *MODBUS_Slave::AI = nullptr;
+bool *MODBUS_Slave::DI = nullptr;
 
 uint8_t MODBUS_Slave::toError(uint8_t code)
 {
@@ -77,13 +82,13 @@ void MODBUS_Slave::readOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > MODBUS_DQ_LAST_ADDR || addr < MODBUS_DQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > DQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_DQ_LAST_ADDR || quantity < 1) //check if illegal number of outputs was selected
+    else if (addr + quantity - 1 > DQSize-1 || quantity < 1) //check if illegal number of outputs was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUTS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -129,13 +134,13 @@ void MODBUS_Slave::readInputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t 
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > MODBUS_DI_LAST_ADDR || addr < MODBUS_DI_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > DISize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_DI_LAST_ADDR || quantity < 1) //check if illegal number of inputs was selected
+    else if (addr + quantity - 1 > DISize-1 || quantity < 1) //check if illegal number of inputs was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUTS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -181,13 +186,13 @@ void MODBUS_Slave::readOutputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL,
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > MODBUS_AQ_LAST_ADDR || addr < MODBUS_AQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > AQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_AQ_LAST_ADDR || quantity < 1) //check if illegal number of output registers was selected
+    else if (addr + quantity - 1 > AQSize-1 || quantity < 1) //check if illegal number of output registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUT_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -224,13 +229,13 @@ void MODBUS_Slave::readInputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, 
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > MODBUS_AI_LAST_ADDR || addr < MODBUS_AI_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > AISize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_AI_LAST_ADDR || quantity < 1) //check if illegal number of input registers was selected
+    else if (addr + quantity - 1 > AISize-1 || quantity < 1) //check if illegal number of input registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -263,7 +268,7 @@ void MODBUS_Slave::writeOutput(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t
 {
     uint16_t addr = toWord(addrH, addrL);
 
-    if (addr > MODBUS_DQ_LAST_ADDR || addr < MODBUS_DQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > DQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_OUTPUT), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -288,7 +293,7 @@ void MODBUS_Slave::writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     uint16_t addr = toWord(addrH, addrL);
     uint16_t val = toWord(valH, valL);
 
-    if (addr > MODBUS_AQ_LAST_ADDR || addr < MODBUS_AQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > AQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -313,13 +318,13 @@ void MODBUS_Slave::writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     if (lastByteQuantity != 0)
         desiredByteCount++;
 
-    if (addr > MODBUS_DQ_LAST_ADDR || addr < MODBUS_DQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > DQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_DQ_LAST_ADDR || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
+    else if (addr + quantity - 1 > DQSize-1 || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_OUTPUTS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -351,13 +356,13 @@ void MODBUS_Slave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uin
 
     uint8_t desiredByteCount = quantity * 2;
 
-    if (addr > MODBUS_AQ_LAST_ADDR || addr < MODBUS_AQ_FIRST_ADDR) //check if illegal adress was selected
+    if (addr > AQSize-1 || addr < 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
         return;
     }
-    else if (addr + quantity - 1 > MODBUS_AQ_LAST_ADDR || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
+    else if (addr + quantity - 1 > AQSize-1 || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};
         sendData(tab, 3);
@@ -379,7 +384,7 @@ void MODBUS_Slave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uin
     return;
 }
 
-void MODBUS_Slave::init(uint8_t id_)
+void MODBUS_Slave::init(uint8_t id_, uint16_t *AQ_, int AQs, bool *DQ_,int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs)
 {
     if (id_ == 0 || id_ > 247)
         return;
@@ -397,13 +402,22 @@ void MODBUS_Slave::init(uint8_t id_)
 
     id = id_;
 
-    for (auto i = 0; i < MODBUS_AQ_LENGTH; i++)
+    AQ = AQ_;
+    DQ = DQ_;
+    AI = AI_;
+    DI = DI_;
+    AQSize = AQs;
+    DQSize = DQs;
+    AISize = AIs;
+    DISize = DIs;
+
+    for (auto i = 0; i < AQSize; i++)
         AQ[i] = 0;
-    for (auto i = 0; i < MODBUS_DQ_LENGTH; i++)
+    for (auto i = 0; i < DQSize; i++)
         DQ[i] = 0;
-    for (auto i = 0; i < MODBUS_AI_LENGTH; i++)
+    for (auto i = 0; i < AISize; i++)
         AI[i] = 0;
-    for (auto i = 0; i < MODBUS_DI_LENGTH; i++)
+    for (auto i = 0; i < DISize; i++)
         DI[i] = 0;
 
     active = 1;
@@ -411,8 +425,8 @@ void MODBUS_Slave::init(uint8_t id_)
 
 void MODBUS_Slave::event()
 {
-    uint8_t command[MODBUS_FRAME_LENGTH]; //should be bigger probably (The maximum size of a MODBUS RTU frame is 256 bytes. - MODBUS over Serial Line  Specification and Implementation Guide  V1.02)
-    uint8_t commandLength = Serial.readBytes(command, MODBUS_FRAME_LENGTH);
+    uint8_t command[MODBUS_MAX_FRAME_SIZE]; //should be bigger probably (The maximum size of a MODBUS RTU frame is 256 bytes. - MODBUS over Serial Line  Specification and Implementation Guide  V1.02)
+    uint8_t commandLength = Serial.readBytes(command, MODBUS_MAX_FRAME_SIZE);
 
     if (commandLength < 2 + MODBUS_CRC_BYTE_COUNT || !active) //id and function code is necessary
     {

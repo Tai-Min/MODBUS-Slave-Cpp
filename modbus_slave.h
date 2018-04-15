@@ -1,5 +1,5 @@
-#ifndef SLAVE_H
-#define SLAVE_H
+#ifndef MODBUS_SLAVE_H
+#define MODBUS_SLAVE_H
 
 #include <Arduino.h>
 #include "modbus_defines.h"
@@ -7,8 +7,13 @@
 class MODBUS_Slave
 {
 private:
-    static int id;
+    static uint8_t id;
     static bool active;
+
+    static int AQSize;
+    static int DQSize;
+    static int AISize;
+    static int DISize;
 
     static uint8_t toError(uint8_t code);
     static uint16_t toWord(uint8_t H, uint8_t L);
@@ -28,13 +33,13 @@ private:
     static void writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
     
 public:
-    static void init(int id_);
+    static void init(uint8_t id_, uint16_t *AQ_, int AQs, bool *DQ_,int DQs, uint16_t *AI_, int AIs, bool *DI_, int DIs);
     static void event();
 
-    static uint16_t AQ[MODBUS_AQ_LENGTH];
-    static bool DQ[MODBUS_DQ_LENGTH];
-    static uint16_t AI[MODBUS_AI_LENGTH];
-    static bool DI[MODBUS_DI_LENGTH];
+    static uint16_t *AQ;
+    static bool *DQ;
+    static uint16_t *AI;
+    static bool *DI;
 };
 
 #endif
