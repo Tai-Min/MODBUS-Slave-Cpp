@@ -1,12 +1,15 @@
-#ifndef MODBUS_DEFINES_H
-#define MODBUS_DEFINES_H
+#ifndef MDEFINES_H
+#define MDEFINES_H
 
 #include <HardwareSerial.h>
 
 #define MODBUS_BYTE 8
-#define MODBUS_ID_BROADCAST 0
 #define MODBUS_CRC_BYTE_COUNT 2
 #define MODBUS_MAX_FRAME_SIZE SERIAL_RX_BUFFER_SIZE
+
+#define MODBUS_ID_BROADCAST 0
+#define MODBUS_ID_MIN 1
+#define MODBUS_ID_MAX 247
 
 //byte position in request frame
 #define MODBUS_ID 0
