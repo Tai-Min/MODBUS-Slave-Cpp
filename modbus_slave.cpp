@@ -84,7 +84,7 @@ void MSlave::readOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quant
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > DQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > DQSize - 1 || DQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -136,7 +136,7 @@ void MSlave::readInputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quanti
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > DISize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > DISize - 1 || DISize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -188,7 +188,7 @@ void MSlave::readOutputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > AQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > AQSize - 1 || AQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -231,7 +231,7 @@ void MSlave::readInputRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > AISize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > AISize - 1 || AISize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -270,7 +270,7 @@ void MSlave::writeOutput(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH,
 {
     uint16_t addr = toWord(addrH, addrL);
 
-    if (addr > DQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > DQSize - 1 || DQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_OUTPUT), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -295,7 +295,7 @@ void MSlave::writeRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t val
     uint16_t addr = toWord(addrH, addrL);
     uint16_t val = toWord(valH, valL);
 
-    if (addr > AQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > AQSize - 1 || AQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -320,7 +320,7 @@ void MSlave::writeNOutputs(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t qua
     if (lastByteQuantity != 0)
         desiredByteCount++;
 
-    if (addr > DQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > DQSize - 1 || DQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
@@ -358,7 +358,7 @@ void MSlave::writeNRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t q
 
     uint8_t desiredByteCount = quantity * 2;
 
-    if (addr > AQSize - 1 || addr < 0) //check if illegal adress was selected
+    if (addr > AQSize - 1 || AQSize == 0) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendData(tab, 3);
