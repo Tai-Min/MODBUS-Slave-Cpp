@@ -39,42 +39,48 @@ Reading status of led 13: <br />
 #include "mslave.h"
 
 int ledPin = 13;
+int potPin = A0;
+int analogLed = 11;
 
 int deviceID = 1;
-const int AQSize = 10;//randomly chosen array sizes just for this example 
-const int AISize = 8;
-const int DQSize = 5;
-const int DISize = 12;
+const int AnalogOutSize = 10;//randomly chosen array sizes just for this example 
+const int AnalogInSize = 8;
+const int DigitalOutSize = 5;
+const int DigitalInSize = 12;
 
-uint16_t AQ[AQSize];//holding registers
-uint16_t AI[AISize];//input registers
-bool DQ[DQSize];    //coils
-bool DI[DISize];    //inputs
+uint16_t AnalogOut[AnalogOutSize];//holding registers
+uint16_t AnalogIn[AnalogInSize];//input registers
+bool DigitalOut[DigitalOutSize];    //coils
+bool DigitalIn[DigitalInSize];    //inputs
 
-MSlave slave;
+MSlave slave(deviceID, &Serial);
 
 void setup()
 {
   pinMode(ledPin,OUTPUT);
+  pinMode(potPin, INPUT);
+  pinMode(analogLed, OUTPUT);
   
-  slave.setId(deviceID);
-  slave.setCoils(DQ, DQSize);
-  slave.setInputs(DI, DISize);
-  slave.setHoldingRegisters(AQ, AQSize);//this example does not use holding registers nor input registers
-  slave.setInputRegisters(AI, AISize);  //but added these just to show corresponding functions
-  slave.setSerial(&Serial);
-  Serial.begin(115200, SERIAL_8E1);//serial with 8 bits of data, even parity and one stop bit
+  slave.setDigitalOut(DigitalOut, DigitalOutSize);//this array is read/write for the client
+  slave.setDigitalIn(DigitalIn, DigitalInSize);//this array is read only for the client
+  slave.setAnalogOut(AnalogOut, AnalogOutSize);//this array is read/write for the client
+  slave.setAnalogIn(AnalogIn, AnalogInSize);//this array is read only for the client
+  
+  //serial with 8 bits of data, even parity and one stop bit
   //"Even parity is required, other modes ( odd parity, no parity ) may also be used. In order to ensure a maximum compatibility with
   //other products, it is recommended to support also No parity mode. The default parity mode must be even parity.
   //Remark : the use of no parity requires 2 stop bits."
   //source: MODBUS over Serial Line Specification and Implementation Guide V1.02
+  Serial.begin(115200, SERIAL_8E1);//you don't need to set it like this but make sure both client and server use equally configured serial
 }
 
 void loop()
 {
     slave.event();
-    digitalWrite(ledPin, DQ[0]);
-    DI[6] = digitalRead(ledPin);
+    digitalWrite(ledPin, DigitalOut[0]);
+    analogWrite(analogLed, AnalogOut[5]);
+    DigitalIn[6] = digitalRead(ledPin);
+    AnalogIn[3] = analogRead(potPin);
 }
 ```
 

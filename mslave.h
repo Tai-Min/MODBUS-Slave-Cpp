@@ -7,12 +7,13 @@
 class MSlave
 {
   private:
+    bool crcDisabled = 0;
     uint8_t id = 255;
 
-    uint16_t *AQ = nullptr;
-    bool *DQ = nullptr;
-    uint16_t *AI = nullptr;
-    bool *DI = nullptr;
+    uint16_t *AQ = nullptr;//analog out
+    bool *DQ = nullptr;//digital out
+    uint16_t *AI = nullptr;//analog in
+    bool *DI = nullptr;//digital in
 
     int AQSize = 0;
     int DQSize = 0;
@@ -39,12 +40,13 @@ class MSlave
     void forceMultipleRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
 
   public:
-    void setSerial(HardwareSerial *S_);
-    void setId(uint8_t id_);
-    void setCoils(bool *DQ_, int DQsize_);
-    void setInputs(bool *DI_, int DIsize_);
-    void setHoldingRegisters(uint16_t *AQ_, int AQsize_);
-    void setInputRegisters(uint16_t *AI_, int AIsize_);
+    MSlave(uint8_t id_, HardwareSerial *S_);
+    void enableCRC();
+    void disableCRC();
+    void setDigitalOut(bool *DQ_, int DQsize_);
+    void setDigitalIn(bool *DI_, int DIsize_);
+    void setAnalogOut(uint16_t *AQ_, int AQsize_);
+    void setAnalogIn(uint16_t *AI_, int AIsize_);
     void event();
 };
 
