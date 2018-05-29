@@ -19,6 +19,31 @@ The library expects full RTU frames consisting of:
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
 ## Usage
+This library is really straightforward to use: <br />
+Firstly, you need to create MSlave object with an id and a HardwareSerial address passed to it. i.e:
+```
+MSlave s(1, &Serial); //where 1 is a device ID and &Serial is an addres to standard Arduino Serial
+```
+Then you need to pass your boolean and uint16_t arrays and their respective sizes to object by using:
+```
+s.setDigitalOut(arr1, size1); //bool - this array is read/write for the client
+s.setDigitalIn(arr2, size2); //bool - this array is read only for the client
+s.setAnalogOut(arr3, size3); //uint16_t - this array is read/write for the client
+s.setAnalogIn(arr4, size4); //uint16_t - this array is read only for the client
+```
+if you want, you can disable or enable CRC check by using:
+```
+s.disableCRC();
+s.enableCRC();
+```
+CRC is enabled by default. <br /> <br />
+The last step is to invoke 
+```
+s.event();
+```
+as often as you can in program's loop. <br />
+
+## Example
 Using the code shown below you can turn on led on pin 13 by sending to Arduino "Force single coil" frame: <br />
 | 1 | 5 | 0 0 | 255 0 | where: <br />
 + 1 is the device ID
@@ -48,10 +73,10 @@ const int AnalogInSize = 8;
 const int DigitalOutSize = 5;
 const int DigitalInSize = 12;
 
-uint16_t AnalogOut[AnalogOutSize];//holding registers
-uint16_t AnalogIn[AnalogInSize];//input registers
-bool DigitalOut[DigitalOutSize];    //coils
-bool DigitalIn[DigitalInSize];    //inputs
+uint16_t AnalogOut[AnalogOutSize]; //holding registers
+uint16_t AnalogIn[AnalogInSize]; //input registers
+bool DigitalOut[DigitalOutSize]; //coils
+bool DigitalIn[DigitalInSize]; //inputs
 
 MSlave slave(deviceID, &Serial);
 
