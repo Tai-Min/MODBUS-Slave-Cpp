@@ -21,27 +21,31 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 ## Usage
 This library is really straightforward to use: <br />
 Firstly, you need to create MSlave object with an id and a HardwareSerial address passed to it. i.e:
+```cpp
+MSlave s(1, &Serial); //where 1 is the device ID and &Serial is an addres to standard Arduino Serial
 ```
-MSlave s(1, &Serial); //where 1 is a device ID and &Serial is an addres to standard Arduino Serial
-```
-Then you need to pass your boolean and uint16_t arrays and their respective sizes to object by using:
-```
+Then you need to pass your boolean and uint16_t arrays and their respective sizes to MSlave object by using:
+```cpp
 s.setDigitalOut(arr1, size1); //bool - this array is read/write for the client
 s.setDigitalIn(arr2, size2); //bool - this array is read only for the client
 s.setAnalogOut(arr3, size3); //uint16_t - this array is read/write for the client
 s.setAnalogIn(arr4, size4); //uint16_t - this array is read only for the client
 ```
-if you want, you can disable or enable CRC check by using:
+
+The last step is to invoke 
+```cpp
+s.event();
 ```
+as often as you can in program's loop. <br />
+
+Additional functions: <br />
+if you want, you can disable or enable CRC check in request/response/exception frames by using:
+```cpp
 s.disableCRC();
 s.enableCRC();
 ```
 CRC is enabled by default. <br /> <br />
-The last step is to invoke 
-```
-s.event();
-```
-as often as you can in program's loop. <br />
+
 
 ## Example
 Using the code shown below you can turn on led on pin 13 by sending to Arduino "Force single coil" frame: <br />
@@ -60,7 +64,7 @@ Reading status of led 13: <br />
 + 2 is "Read input status" function id
 + 0 6 are two bytes of address to our coil which is 6
 + 0 1 are two bytes of quantity of inputs to be read which is 1
-```
+```cpp
 #include "mslave.h"
 
 int ledPin = 13;
@@ -90,6 +94,7 @@ void setup()
   slave.setDigitalIn(DigitalIn, DigitalInSize);//this array is read only for the client
   slave.setAnalogOut(AnalogOut, AnalogOutSize);//this array is read/write for the client
   slave.setAnalogIn(AnalogIn, AnalogInSize);//this array is read only for the client
+  slave.disableCRC();
   
   //serial with 8 bits of data, even parity and one stop bit
   //"Even parity is required, other modes ( odd parity, no parity ) may also be used. In order to ensure a maximum compatibility with
