@@ -15,10 +15,10 @@ class MSlave
     uint16_t *AI = nullptr;//analog in
     bool *DI = nullptr;//digital in
 
-    int AQSize = 0;
-    int DQSize = 0;
-    int AISize = 0;
-    int DISize = 0;
+    uint16_t AQSize = 0;
+    uint16_t DQSize = 0;
+    uint16_t AISize = 0;
+    uint16_t DISize = 0;
 
     HardwareSerial *S;
 
@@ -43,10 +43,17 @@ class MSlave
     MSlave(uint8_t id_, HardwareSerial *S_);
     void enableCRC();
     void disableCRC();
-    void setDigitalOut(bool *DQ_, int DQsize_);
-    void setDigitalIn(bool *DI_, int DIsize_);
-    void setAnalogOut(uint16_t *AQ_, int AQsize_);
-    void setAnalogIn(uint16_t *AI_, int AIsize_);
+    
+    void setDigitalOut(bool *DQ_, uint16_t DQsize_);
+    void setDigitalIn(bool *DI_, uint16_t DIsize_);
+    void setAnalogOut(uint16_t *AQ_, uint16_t AQsize_);
+    void setAnalogIn(uint16_t *AI_, uint16_t AIsize_);
+
+    void setCoils(bool *DQ_, uint16_t DQsize_);
+    void setInputs(bool *DI_, uint16_t DIsize_);
+    void setHoldingRegisters(uint16_t *AQ_, uint16_t AQsize_);
+    void setInputRegisters(uint16_t *AI_, uint16_t AIsize_);
+
     void event();
 };
 

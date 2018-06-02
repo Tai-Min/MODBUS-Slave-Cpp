@@ -70,7 +70,7 @@ void MSlave::readCoilStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t qu
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > DQSize - 1 || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
+    if (addr >= DQSize || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -122,7 +122,7 @@ void MSlave::readInputStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t q
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > DISize - 1 || DISize == 0 || DI == nullptr) //check if illegal adress was selected
+    if (addr >= DISize || DISize == 0 || DI == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -174,7 +174,7 @@ void MSlave::readHoldingRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > AQSize - 1 || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
+    if (addr >= AQSize || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_OUTPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -217,7 +217,7 @@ void MSlave::readInputRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr > AISize - 1 || AISize == 0 || AI == nullptr) //check if illegal adress was selected
+    if (addr >= AISize || AISize == 0 || AI == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -256,7 +256,7 @@ void MSlave::forceSingleCoil(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t v
 {
     uint16_t addr = toWord(addrH, addrL);
 
-    if (addr > DQSize - 1 || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
+    if (addr >= DQSize || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_OUTPUT), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -281,7 +281,7 @@ void MSlave::presetSingleRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint
     uint16_t addr = toWord(addrH, addrL);
     uint16_t val = toWord(valH, valL);
 
-    if (addr > AQSize - 1 || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
+    if (addr >= AQSize || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -306,7 +306,7 @@ void MSlave::forceMultipleCoils(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_
     if (lastByteQuantity != 0)
         desiredByteCount++;
 
-    if (addr > DQSize - 1 || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
+    if (addr >= DQSize || DQSize == 0 || DQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_OUTPUTS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -344,7 +344,7 @@ void MSlave::forceMultipleRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, ui
 
     uint8_t desiredByteCount = quantity * 2;
 
-    if (addr > AQSize - 1 || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
+    if (addr >= AQSize || AQSize == 0 || AQ == nullptr) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_WRITE_N_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -389,7 +389,7 @@ void MSlave::disableCRC()
     crcDisabled = 1;
 }
 
-void MSlave::setDigitalOut(bool *DQ_, int DQSize_)
+void MSlave::setDigitalOut(bool *DQ_, uint16_t DQSize_)
 {
     DQ = DQ_;
     DQSize = DQSize_;
@@ -397,7 +397,7 @@ void MSlave::setDigitalOut(bool *DQ_, int DQSize_)
         DQ[i] = 0;
 }
 
-void MSlave::setDigitalIn(bool *DI_, int DISize_)
+void MSlave::setDigitalIn(bool *DI_, uint16_t DISize_)
 {
     DI = DI_;
     DISize = DISize_;
@@ -405,7 +405,7 @@ void MSlave::setDigitalIn(bool *DI_, int DISize_)
         DI[i] = 0;
 }
 
-void MSlave::setAnalogOut(uint16_t *AQ_, int AQSize_)
+void MSlave::setAnalogOut(uint16_t *AQ_, uint16_t AQSize_)
 {
     AQ = AQ_;
     AQSize = AQSize_;
@@ -413,12 +413,32 @@ void MSlave::setAnalogOut(uint16_t *AQ_, int AQSize_)
         AQ[i] = 0;
 }
 
-void MSlave::setAnalogIn(uint16_t *AI_, int AISize_)
+void MSlave::setAnalogIn(uint16_t *AI_, uint16_t AISize_)
 {
     AI = AI_;
     AISize = AISize_;
     for (auto i = 0; i < AISize; i++)
         AI[i] = 0;
+}
+
+void MSlave::setCoils(bool *DQ_, uint16_t DQsize_)
+{
+    setDigitalOut(DQ_, DQsize_);
+}
+
+void MSlave::setInputs(bool *DI_, uint16_t DIsize_)
+{
+    setDigitalIn(DI_, DIsize_);
+}
+
+void MSlave::setHoldingRegisters(uint16_t *AQ_, uint16_t AQsize_)
+{
+    setAnalogOut(AQ_, AQsize_);
+}
+
+void MSlave::setInputRegisters(uint16_t *AI_, uint16_t AIsize_)
+{
+    setAnalogIn(AI_, AIsize_);
 }
 
 void MSlave::event()
@@ -449,7 +469,7 @@ void MSlave::event()
             return;
         }
     }
-    else//else ignore crc stuff
+    else //else ignore crc stuff
     {
         if (commandLength < 2) //id and function code is necessary
         {
