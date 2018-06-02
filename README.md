@@ -26,10 +26,10 @@ MSlave s(1, &Serial); //where 1 is the device ID and &Serial is an addres to sta
 ```
 Then you need to pass your boolean and uint16_t arrays and their respective sizes to MSlave object by using:
 ```cpp
-s.setDigitalOut(arr1, size1); //(void) expects (bool[], bool) - this array is read/write for the client
-s.setDigitalIn(arr2, size2); //(void) expects (bool[], bool) - this array is read only for the client
-s.setAnalogOut(arr3, size3); //(void) expects (uint16_t[], uint16_t) - this array is read/write for the client
-s.setAnalogIn(arr4, size4); //(void) expects (uint16_t[], uint16_t) - this array is read only for the client
+s.setDigitalOut(arr1, size1); //(void) expects (bool[], int) - this array is read/write for the client
+s.setDigitalIn(arr2, size2); //(void) expects (bool[], int) - this array is read only for the client
+s.setAnalogOut(arr3, size3); //(void) expects (uint16_t[], int) - this array is read/write for the client
+s.setAnalogIn(arr4, size4); //(void) expects (uint16_t[], int) - this array is read only for the client
 ```
 
 The last step is to invoke 
