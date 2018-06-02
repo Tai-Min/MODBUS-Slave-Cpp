@@ -14,7 +14,7 @@ The library expects full RTU frames consisting of:
 + device ID (1 byte)
 + function ID (1 byte)
 + data (n bytes)
-+ crc (2 bytes)
++ crc (2 bytes) <- There is function to disable crc check if not needed
 
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
@@ -37,6 +37,7 @@ The last step is to invoke
 s.event();
 ```
 as often as you can in program's loop. <br />
+And that's all. MSlave will read from/write to given arrays everytime client will make a request to do so. <br />
 
 Additional functions: <br />
 if you want, you can disable or enable CRC check in request/response/exception frames by using:
