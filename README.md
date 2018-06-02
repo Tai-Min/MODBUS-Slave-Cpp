@@ -26,10 +26,10 @@ MSlave s(1, &Serial); //where 1 is the device ID and &Serial is an addres to sta
 ```
 Then you need to pass your boolean and uint16_t arrays and their respective sizes to MSlave object by using:
 ```cpp
-s.setDigitalOut(arr1, size1); //(void) expects (bool[], int) - this array is read/write for the client
-s.setDigitalIn(arr2, size2); //(void) expects (bool[], int) - this array is read only for the client
-s.setAnalogOut(arr3, size3); //(void) expects (uint16_t[], int) - this array is read/write for the client
-s.setAnalogIn(arr4, size4); //(void) expects (uint16_t[], int) - this array is read only for the client
+s.setDigitalOut(arr1, size1); //(void) expects (bool[], uint16_t) - this array is read/write for the client
+s.setDigitalIn(arr2, size2); //(void) expects (bool[], uint16_t) - this array is read only for the client
+s.setAnalogOut(arr3, size3); //(void) expects (uint16_t[], uint16_t) - this array is read/write for the client
+s.setAnalogIn(arr4, size4); //(void) expects (uint16_t[], uint16_t) - this array is read only for the client
 ```
 
 The last step is to invoke 
@@ -39,13 +39,20 @@ s.event(); //(void) expects nothing;
 as often as you can in program's loop. <br />
 And that's all. MSlave will read from/write to given arrays everytime client will make a request to do so. <br />
 
-Additional functions: <br />
+### Additional functions: <br />
 if you want, you can disable or enable CRC check in request/response/exception frames by using:
 ```cpp
 s.disableCRC(); //(void) expects nothing;
 s.enableCRC(); //(void) expects nothing;
 ```
 CRC is enabled by default. <br /> <br />
+
+```cpp
+s.setCoils(arr1, size1); //(void) expects (bool[], uint16_t) - same as setDigitalOut
+s.setInputs(arr2, size2); //(void) expects (bool[], uint16_t) - same as setDigitalIn
+s.setHoldingRegisters(arr3, size3); //(void) expects (uint16_t[], uint16_t) - same as setAnalogOut
+s.setInputRegisters(arr4, size4); //(void) expects (uint16_t[], uint16_t) - same as setAnalogIn
+```
 
 
 ## Example
