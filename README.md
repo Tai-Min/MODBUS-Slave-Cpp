@@ -109,7 +109,8 @@ void setup()
   //other products, it is recommended to support also No parity mode. The default parity mode must be even parity.
   //Remark : the use of no parity requires 2 stop bits."
   //source: MODBUS over Serial Line Specification and Implementation Guide V1.02
-  Serial.begin(115200, SERIAL_8E1);//you don't need to set it like this but make sure both client and server use equally configured serial
+  //you don't need to set it like this but make sure both client and server use equally configured 
+  Serial.begin(115200, SERIAL_8E1);serial
 }
 
 void loop()
