@@ -31,10 +31,10 @@ int buttonPin = 3;
 
 int deviceID = 1;
 
-//1 digital input
-//1 digital output
-//1 analog input
-//2 analog outputs
+//1 digital input so you can read address 0
+//1 digital output so you can read address 0
+//1 analog input so you can read address 0
+//2 analog outputs so you can read addresses 0,1
 MSlave<1, 1, 1, 2> server(deviceID, &Serial);//initialize slave device
 
 void setup()
