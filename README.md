@@ -22,10 +22,10 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 This library is really straightforward to use: <br />
 Firstly, you need to create MSlave object with memory cell sizes, an id and a HardwareSerial address passed to it. i.e:
 ```cpp
-//<5> - number of boolean inputs (outputs) - (read only for this, read/write for the client) (uint16_t)
-//<12> - number of boolean outputs (inputs) - (read/write for this device, read only for the client) (uint16_t)
-//<10> - number of uint16_t inputs (holding registers) - (read only for this, read/write for the client) (uint16_t)
-//<8> - number of uint16_t outputs (input registers) - (read/write for this device, read only for the client) (uint16_t)
+//<5> - number of boolean inputs - (read only for this, read/write for the client) (uint16_t)
+//<12> - number of boolean outputs - (read/write for this device, read only for the client) (uint16_t)
+//<10> - number of uint16_t inputs - (read only for this, read/write for the client) (uint16_t)
+//<8> - number of uint16_t outputs - (read/write for this device, read only for the client) (uint16_t)
 //1 is the unique device ID (uint8_t)
 //&Serial is an addres to Arduino's Serial object (&HardwareSerial)
 MSlave<5,12,10,8> slave(1, &Serial);
