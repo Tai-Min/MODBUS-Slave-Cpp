@@ -454,7 +454,18 @@ void MSlave<DQSize, DISize, AQSize, AISize>::forceMultipleRegisters(uint8_t id, 
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 MSlave<DQSize, DISize, AQSize, AISize>::MSlave(uint8_t id_, HardwareSerial *S_)
-    : id(id_), S(S_) {}
+    : id(id_), S(S_)
+{
+    S->setTimeout(15);
+    for (auto i = 0; i < DQSize; i++)
+        DQ[i] = 0;
+    for (auto i = 0; i < DISize; i++)
+        DI[i] = 0;
+    for (auto i = 0; i < AQSize; i++)
+        AQ[i] = 0;
+    for (auto i = 0; i < AISize; i++)
+        AI[i] = 0;
+}
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 void MSlave<DQSize, DISize, AQSize, AISize>::enableCRC()
@@ -517,7 +528,9 @@ void MSlave<DQSize, DISize, AQSize, AISize>::event()
 
     uint8_t command[MODBUS_MAX_FRAME_SIZE]; //should be bigger probably (The maximum size of a MODBUS RTU frame is 256 bytes. - MODBUS over Serial Line  Specification and Implementation Guide  V1.02)
     uint8_t commandLength = S->readBytes(command, MODBUS_MAX_FRAME_SIZE);
-
+    S->write(commandLength);
+    S->write(command[0]);
+    S->write(command[1]);
     if (!crcDisabled) //check crc when enabled
     {
         if (commandLength < 2 + MODBUS_CRC_BYTE_COUNT) //id and function code is necessary
