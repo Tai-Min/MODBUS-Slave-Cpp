@@ -35,7 +35,7 @@ then you need to invoke
 s.event(); //(bool) expects nothing;
 ```
 as often as you can in program's loop. <br />
-event() returns true only when valid read/write operation has happened.
+event() returns true only when valid read/write operation has happened.<br />
 And that's all. <br /> <br/>
 You can read input/outputs from MSlave object by using:
 ```cpp
