@@ -29,16 +29,19 @@ MSlave<uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol> variableName(uint
 **aol** - length of analog outputs array<br />
 **id** - unique id of the server <br />
 **serial** - address to Arduino's HardwareSerial object <br />
+
 ### CRC check control:
 ```cpp
 void disableCRC();
 void enableCRC();
 ```
+<br />
 ### Check if one of eight rtu frames has been processed:
 ```cpp
 bool available();
 ```
-### Read from modbus object:
+<br />
+### Read from digital/analog input/output array:
 ```cpp
 bool digitalRead(uint16_t address, bool mode); object's analogWrite
 uint16_t analogRead(uint16_t address, bool mode); 
@@ -47,13 +50,15 @@ uint16_t analogRead(uint16_t address, bool mode);
 **mode:** 
 + INPUT - things from the outside (digital/analog in)
 + OUTPUT - things written by using analogWrite function (digital/analog out)
-### Write to modbus object:
+<br />
+### Write to digital/analog output array:
 ```cpp
 void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
 ```
 **address** - address to value <br />
-**value** - 
+**value** - <br />
+
 ## Example
 ```cpp
 #include "MSlave.h"
