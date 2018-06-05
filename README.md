@@ -114,17 +114,29 @@ void loop()
 }
 ```
 #### frame to turn on led on pin 13:
-| 1 | 5 | 0 0 | 255 0 | <br />
+|id  |function|address|value  |
+|:--:|:------:|:-----:|:-----:|
+|1   |5       |0 0    |255 0  |
 #### frame to change light intensity of pwm led on pin 11:
-| 1 | 6 | 0 0 | 128 0 | <br />
+|id  |function|address|value  |
+|:--:|:------:|:-----:|:-----:|
+| 1  | 6      | 0 0   | 128 0 |
 #### frame to read state of the button on pin 3:
-| 1 | 2 | 0 0 | 0 1 | <br />
+|id  |function|address of the first input|quantity of inputs to read  |
+|:--:|:------:|:-----:|:-----------------------------:|
+| 1  | 2      | 0 0   | 0 1                           |
 #### frame to read state of the potentiometer on pin A0:
-| 1 | 4 | 0 0 | 0 1 | <br />
+|id  |function|address of the first input|quantity of inputs to read  |
+|:--:|:------:|:-----:|:-----------------------------:|
+| 1  | 4      | 0 0   | 0 1                           |
 #### frame to read state of led on pin 13:
-| 1 | 1 | 0 0 | 0 1 | <br />
+|id  |function|address of the first input|quantity of outputs to read |
+|:--:|:------:|:-----:|:-----------------------------:|
+| 1 | 1 | 0 0 | 0 1 |
 #### frame to read states of both potentiometer and value on address 1:
-| 1 | 4 | 0 0 | 0 2 | <br />
+|id  |function|address of the first input|quantity of inputs to read  |
+|:--:|:------:|:-----:|:-----------------------------:|
+| 1 | 4 | 0 0 | 0 2 |
 ## About
 The library was written using following documents and sites:
 + MODBUS over Serial Line Specification and Implementation Guide V1.02
