@@ -19,6 +19,30 @@ The library expects full RTU frames consisting of:
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
 ## Usage
+1. Initialize MSlave object:
+```cpp
+MSlave<uint16_t digital in size, uint16_t digital out size, uint16_t analog in size, uint16_t analog out size> name(uint8_t device id, HardwareSerial *serial);
+```
+2. Disable or enable crc check (optional, enabled by default):
+```cpp
+void disableCRC();
+void enableCRC();
+```
+3. Begin serial device.
+4. Check modbus object as often as possible by using:
+```cpp
+bool available(); //returns true only when one of eight rtu frames has been processed
+```
++ Read from modbus object:
+```cpp
+bool digitalRead(uint16_t address, bool mode); //mode INPUT - things from the outside or OUTPUT - things written by using object's analogWrite
+uint16_t analogRead(uint16_t address, bool mode); //mode INPUT - things from the outside or OUTPUT - things written by using object's analogWrite
+```
++ Write to modbus object:
+```cpp
+void digitalWrite(uint16_t address, bool value);
+void analogWrite(uint16_t address, uint16_t value);
+```
 
 ## Example
 ```cpp
