@@ -19,7 +19,7 @@ The library expects full RTU frames consisting of:
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
 ## Usage
-### MSlave variable initializer:
+#### MSlave variable initializer:
 ```cpp
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
 MSlave(uint8_t id, HardwareSerial *serial);
@@ -32,7 +32,7 @@ MSlave(uint8_t id, HardwareSerial *serial);
 **serial** - address to Arduino's HardwareSerial object 
 <br />
 
-### Enable or disable CRC in request/response/exception frames:
+#### Enable or disable CRC in request/response/exception frames:
 ```cpp
 void disableCRC();
 void enableCRC();
@@ -40,7 +40,7 @@ void enableCRC();
 CRC is enabled by default.
 <br />
 
-### Check if there is request frame in serial buffer and parse it:
+#### Check if there is request frame in serial buffer and parse it:
 ```cpp
 bool available();
 ```
@@ -48,7 +48,7 @@ returns true only if one of eight rtu frames has been successfully processed <br
 This function should be used as often as possible to provide responsive and dependable server.
 <br />
 
-### Read from digital/analog input/output array:
+#### Read from digital/analog input/output array:
 ```cpp
 bool digitalRead(uint16_t address, bool mode);
 uint16_t analogRead(uint16_t address, bool mode); 
@@ -58,7 +58,7 @@ uint16_t analogRead(uint16_t address, bool mode);
 + INPUT - things from the outside
 + OUTPUT - things written by using analogWrite function
 
-### Write to digital/analog output array:
+#### Write to digital/analog output array:
 ```cpp
 void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
@@ -113,17 +113,17 @@ void loop()
   }
 }
 ```
-### frame to turn on led on pin 13:
+#### frame to turn on led on pin 13:
 | 1 | 5 | 0 0 | 255 0 | <br />
-### frame to change light intensity of pwm led on pin 11:
+#### frame to change light intensity of pwm led on pin 11:
 | 1 | 6 | 0 0 | 128 0 | <br />
-### frame to read state of the button on pin 3:
+#### frame to read state of the button on pin 3:
 | 1 | 2 | 0 0 | 0 1 | <br />
-### frame to read state of the potentiometer on pin A0:
+#### frame to read state of the potentiometer on pin A0:
 | 1 | 4 | 0 0 | 0 1 | <br />
-### frame to read state of led on pin 13:
+#### frame to read state of led on pin 13:
 | 1 | 1 | 0 0 | 0 1 | <br />
-### frame to read state of both potentiometer and value on address 1 (server.analogWrite(1, 512)):
+#### frame to read state of both potentiometer and value on address 1:
 | 1 | 4 | 0 0 | 0 2 | <br />
 ## About
 The library was written using following documents and sites:
