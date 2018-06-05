@@ -19,26 +19,26 @@ The library expects full RTU frames consisting of:
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
 ## Usage
-1. Initialize MSlave object:
+### MSlave variable initializer:
 ```cpp
-MSlave<uint16_t digital in size, uint16_t digital out size, uint16_t analog in size, uint16_t analog out size> serverName(uint8_t device id, HardwareSerial *serial);
+MSlave<uint16_t digital in size, uint16_t digital out size, uint16_t analog in size, uint16_t analog out size> variableName(uint8_t device id, HardwareSerial *serial);
 ```
-2. Disable or enable crc check (optional, enabled by default):
+### CRC check control:
 ```cpp
 void serverName.disableCRC();
 void serverName.enableCRC();
 ```
-3. Begin serial device.
-4. Check modbus object as often as possible by using:
+### Check if one of eight rtu frames has been processed:
 ```cpp
-bool serverName.available(); //returns true only when one of eight rtu frames has been processed
+bool serverName.available();
 ```
-+ Read from modbus object:
+### Read from modbus object:
 ```cpp
-bool serverName.digitalRead(uint16_t address, bool mode); //mode INPUT - things from the outside or OUTPUT - things written by using object's analogWrite
+bool serverName.digitalRead(uint16_t address, bool mode); object's analogWrite
 uint16_t serverName.analogRead(uint16_t address, bool mode); //mode INPUT - things from the outside or OUTPUT - things written by using object's analogWrite
 ```
-+ Write to modbus object:
++ mode INPUT - things from the outside or OUTPUT - things written by using 
+### Write to modbus object:
 ```cpp
 void serverName.digitalWrite(uint16_t address, bool value);
 void serverName.analogWrite(uint16_t address, uint16_t value);
