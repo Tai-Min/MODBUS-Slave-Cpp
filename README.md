@@ -16,7 +16,7 @@ The library expects full RTU frames consisting of:
 + data (n bytes)
 + crc (2 bytes)
 
-Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
+Also, the library is able to detect invalid request frame and respond to it with an adequate exception frame.
 
 ## Usage
 #### MSlave variable initializer:
@@ -24,10 +24,10 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
 MSlave(uint8_t id, HardwareSerial *serial);
 ```
-**dil** - length of digital inputs array<br />
-**dol** - length of digital outputs array<br />
-**ail** - length of analog inputs array<br />
-**aol** - length of analog outputs array<br />
+**dil** - length of digital inputs array (MODBUS coils)<br /> 
+**dol** - length of digital outputs array (MODBUS inputs)<br />
+**ail** - length of analog inputs array (MODBUS holding registers)<br />
+**aol** - length of analog outputs array (MODBUS input registers)<br />
 **id** - unique id of the server <br />
 **serial** - address to Arduino's HardwareSerial object 
 <br />
@@ -40,7 +40,7 @@ void enableCRC();
 CRC is enabled by default.
 <br />
 
-#### Check if there is request frame in serial buffer and parse it:
+#### Check if there is a request frame in serial buffer and parse it:
 ```cpp
 bool available();
 ```
@@ -55,7 +55,7 @@ uint16_t analogRead(uint16_t address, bool mode);
 ```
 **address** - position in specified array <br />
 **mode:** 
-+ INPUT - things from the outside
++ INPUT - things sent from client devices
 + OUTPUT - things written by using analogWrite function
 
 #### Write to digital/analog output array:
@@ -100,15 +100,15 @@ void setup()
 
 void loop()
 {
-  if (server.available())//check whether some data exchange happened with this device
+  if (server.available())//check whether some successfull data exchange happened with this device
   {
-    digitalWrite(ledPin, server.digitalRead(0, INPUT));//digitalRead external boolean data received from client devices
-    analogWrite(pwmLedPin, server.analogRead(0, INPUT));//analogRead external uint16_t data received from client devices
-    server.digitalWrite(0, digitalRead(buttonPin));//digitalWrite button's state to server object so it will be available to be read from clients
-    server.analogWrite(0, analogRead(potPin));//analogWrite potentiometer's state to server object so it will be available to be read from clients
-    if(server.digitalRead(0, OUTPUT))//read buttons's state from server object
+    digitalWrite(ledPin, server.digitalRead(0, INPUT));//digitalRead digital inputs array data received from client devices
+    analogWrite(pwmLedPin, server.analogRead(0, INPUT));//analogRead analog inputs array data received from client devices
+    server.digitalWrite(0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
+    server.analogWrite(0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
+    if(server.digitalRead(0, OUTPUT))//read buttons's state from digital outputs array
     {
-      server.analogWrite(1, 512);//analogWrite some value server object so it will be available to be read from clients
+      server.analogWrite(1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
     }
   }
 }
