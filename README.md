@@ -55,12 +55,13 @@ int buttonPin = 3;
 
 int deviceID = 1;
 
-//1 digital input
-//1 digital output
-//1 analog input
-//2 analog outputs
+//1 digital input (address 0)
+//1 digital output (address 0)
+//1 analog input (address 0)
+//2 analog outputs (adresses 0,1)
 //addresses works just like arrays
 //so if you have 2 analog outputs, you can access adresses from 0 to 1
+//if you have 40 analog inputs, you can access adresses from 0 to 39 etc
 MSlave<1, 1, 1, 2> server(deviceID, &Serial);//initialize slave device
 
 void setup()
