@@ -14,7 +14,7 @@ The library expects full RTU frames consisting of:
 + device ID (1 byte)
 + function ID (1 byte)
 + data (n bytes)
-+ crc (2 bytes) (optional)
++ crc (2 bytes)
 
 Also, the library is able to detect invalid frame and respond to it with adequate exception frame.
 
@@ -30,24 +30,34 @@ MSlave(uint8_t id, HardwareSerial *serial);
 **aol** - length of analog outputs array<br />
 **id** - unique id of the server <br />
 **serial** - address to Arduino's HardwareSerial object 
-### CRC check control:
+<br />
+
+### Enable or disable CRC in request/response/exception frames:
 ```cpp
 void disableCRC();
 void enableCRC();
 ```
-### Check if one of eight rtu frames has been processed:
+CRC is enabled by default.
+<br />
+
+### Check if there is request frame in serial buffer and parse it:
 ```cpp
 bool available();
 ```
+returns true only if one of eight rtu frames has been successfully processed <br />
+This function should be used as often as possible to provide responsive and dependable server.
+<br />
+
 ### Read from digital/analog input/output array:
 ```cpp
-bool digitalRead(uint16_t address, bool mode); object's analogWrite
+bool digitalRead(uint16_t address, bool mode);
 uint16_t analogRead(uint16_t address, bool mode); 
 ```
 **address** - position in specified array <br />
 **mode:** 
 + INPUT - things from the outside
 + OUTPUT - things written by using analogWrite function
+<br />
 
 ### Write to digital/analog output array:
 ```cpp
@@ -56,7 +66,21 @@ void analogWrite(uint16_t address, uint16_t value);
 ```
 **address** - position in specified array <br />
 **value** - value to be written
+<br />
+
 ## Example
+### frame to turn on led on pin 13:
+| 1 | 5 | 0 0 | 255 0 | <br />
+### frame to change light intensity of pwm led on pin 11:
+| 1 | 6 | 0 0 | 128 0 | <br />
+### frame to read state of the button on pin 3:
+| 1 | 2 | 0 0 | 0 1 | <br />
+### frame to read state of the potentiometer on pin A0:
+| 1 | 4 | 0 0 | 0 1 | <br />
+### frame to read state of led on pin 13:
+| 1 | 1 | 0 0 | 0 1 | <br />
+### frame to read state of both potentiometer and address with index 1 (server.analogWrite(1, 512)):
+| 1 | 4 | 0 0 | 0 2 | <br />
 ```cpp
 #include "MSlave.h"
 
