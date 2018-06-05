@@ -23,12 +23,12 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 ```cpp
 MSlave<uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol> variableName(uint8_t id, HardwareSerial *serial);
 ```
-#### dil - number of digital inputs
-#### dol - number of digital outputs
-#### ail - number of analog inputs
-#### aol - number of analog outputs
-#### id - unique id of the server
-#### serial - address to Arduino's HardwareSerial object
+**dil** - length of digital inputs array<br />
+**dol** - length of digital outputs array<br />
+**ail** - length of analog inputs array<br />
+**aol** - length of analog outputs array<br />
+**id** - unique id of the server <br />
+**serial** - address to Arduino's HardwareSerial object <br />
 ### CRC check control:
 ```cpp
 void disableCRC();
@@ -43,15 +43,17 @@ bool available();
 bool digitalRead(uint16_t address, bool mode); object's analogWrite
 uint16_t analogRead(uint16_t address, bool mode); 
 ```
-#### mode: 
-+ INPUT - things from the outside
-+ OUTPUT - things written by using 
+**address** - position in specified object's array <br />
+**mode:** 
++ INPUT - things from the outside (digital/analog in)
++ OUTPUT - things written by using analogWrite function (digital/analog out)
 ### Write to modbus object:
 ```cpp
 void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
 ```
-
+**address** - address to value <br />
+**value** - 
 ## Example
 ```cpp
 #include "MSlave.h"
