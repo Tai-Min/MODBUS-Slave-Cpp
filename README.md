@@ -123,7 +123,7 @@ void loop()
 | 1 | 4 | 0 0 | 0 1 | <br />
 #### frame to read state of led on pin 13:
 | 1 | 1 | 0 0 | 0 1 | <br />
-#### frame to read state of both potentiometer and value on address 1:
+#### frame to read states of both potentiometer and value on address 1:
 | 1 | 4 | 0 0 | 0 2 | <br />
 ## About
 The library was written using following documents and sites:
