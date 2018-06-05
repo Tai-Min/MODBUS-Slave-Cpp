@@ -120,7 +120,7 @@ void loop()
 #### frame to change light intensity of pwm led on pin 11:
 |id  |function|address|value  |
 |:--:|:------:|:-----:|:-----:|
-| 1  | 6      | 0 0   | 128 0 |
+| 1  | 6      | 0 0   | 0 128 |
 #### frame to read state of the button on pin 3:
 |id  |function|address of the first input|quantity of inputs to read  |
 |:--:|:------:|:-----:|:-----------------------------:|
