@@ -57,7 +57,6 @@ uint16_t analogRead(uint16_t address, bool mode);
 **mode:** 
 + INPUT - things from the outside
 + OUTPUT - things written by using analogWrite function
-<br />
 
 ### Write to digital/analog output array:
 ```cpp
@@ -69,18 +68,6 @@ void analogWrite(uint16_t address, uint16_t value);
 <br />
 
 ## Example
-### frame to turn on led on pin 13:
-| 1 | 5 | 0 0 | 255 0 | <br />
-### frame to change light intensity of pwm led on pin 11:
-| 1 | 6 | 0 0 | 128 0 | <br />
-### frame to read state of the button on pin 3:
-| 1 | 2 | 0 0 | 0 1 | <br />
-### frame to read state of the potentiometer on pin A0:
-| 1 | 4 | 0 0 | 0 1 | <br />
-### frame to read state of led on pin 13:
-| 1 | 1 | 0 0 | 0 1 | <br />
-### frame to read state of both potentiometer and address with index 1 (server.analogWrite(1, 512)):
-| 1 | 4 | 0 0 | 0 2 | <br />
 ```cpp
 #include "MSlave.h"
 
@@ -126,7 +113,18 @@ void loop()
   }
 }
 ```
-
+### frame to turn on led on pin 13:
+| 1 | 5 | 0 0 | 255 0 | <br />
+### frame to change light intensity of pwm led on pin 11:
+| 1 | 6 | 0 0 | 128 0 | <br />
+### frame to read state of the button on pin 3:
+| 1 | 2 | 0 0 | 0 1 | <br />
+### frame to read state of the potentiometer on pin A0:
+| 1 | 4 | 0 0 | 0 1 | <br />
+### frame to read state of led on pin 13:
+| 1 | 1 | 0 0 | 0 1 | <br />
+### frame to read state of both potentiometer and address with index 1 (server.analogWrite(1, 512)):
+| 1 | 4 | 0 0 | 0 2 | <br />
 ## About
 The library was written using following documents and sites:
 + MODBUS over Serial Line Specification and Implementation Guide V1.02
