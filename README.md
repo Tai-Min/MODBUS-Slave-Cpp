@@ -24,10 +24,10 @@ Also, the library is able to detect invalid request frame and respond to it with
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
 MSlave(uint8_t id, HardwareSerial *serial);
 ```
-**dil** - length of digital inputs array (MODBUS coils)<br /> 
-**dol** - length of digital outputs array (MODBUS inputs)<br />
-**ail** - length of analog inputs array (MODBUS holding registers)<br />
-**aol** - length of analog outputs array (MODBUS input registers)<br />
+**dil** - length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
+**dol** - length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
+**ail** - length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
+**aol** - length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
 **id** - unique id of the server <br />
 **serial** - address to Arduino's HardwareSerial object 
 <br />
