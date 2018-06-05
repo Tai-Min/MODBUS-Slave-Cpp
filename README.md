@@ -21,7 +21,8 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 ## Usage
 ### MSlave variable initializer:
 ```cpp
-MSlave<uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol> variableName(uint8_t id, HardwareSerial *serial);
+template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
+MSlave(uint8_t id, HardwareSerial *serial);
 ```
 **dil** - length of digital inputs array<br />
 **dol** - length of digital outputs array<br />
