@@ -21,27 +21,35 @@ Also, the library is able to detect invalid frame and respond to it with adequat
 ## Usage
 ### MSlave variable initializer:
 ```cpp
-MSlave<uint16_t digital in size, uint16_t digital out size, uint16_t analog in size, uint16_t analog out size> variableName(uint8_t device id, HardwareSerial *serial);
+MSlave<uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol> variableName(uint8_t id, HardwareSerial *serial);
 ```
+#### dil - number of digital inputs
+#### dol - number of digital outputs
+#### ail - number of analog inputs
+#### aol - number of analog outputs
+#### id - unique id of the server
+#### serial - address to Arduino's HardwareSerial object
 ### CRC check control:
 ```cpp
-void serverName.disableCRC();
-void serverName.enableCRC();
+void disableCRC();
+void enableCRC();
 ```
 ### Check if one of eight rtu frames has been processed:
 ```cpp
-bool serverName.available();
+bool available();
 ```
 ### Read from modbus object:
 ```cpp
-bool serverName.digitalRead(uint16_t address, bool mode); object's analogWrite
-uint16_t serverName.analogRead(uint16_t address, bool mode); //mode INPUT - things from the outside or OUTPUT - things written by using object's analogWrite
+bool digitalRead(uint16_t address, bool mode); object's analogWrite
+uint16_t analogRead(uint16_t address, bool mode); 
 ```
-+ mode INPUT - things from the outside or OUTPUT - things written by using 
+#### mode: 
++ INPUT - things from the outside
++ OUTPUT - things written by using 
 ### Write to modbus object:
 ```cpp
-void serverName.digitalWrite(uint16_t address, bool value);
-void serverName.analogWrite(uint16_t address, uint16_t value);
+void digitalWrite(uint16_t address, bool value);
+void analogWrite(uint16_t address, uint16_t value);
 ```
 
 ## Example
