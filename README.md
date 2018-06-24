@@ -123,20 +123,20 @@ void loop()
 | 1  | 6      | 0 0   | 0 128 |
 #### frame to read state of the button on pin 3:
 |id  |function|address of the first input|quantity of inputs to read  |
-|:--:|:------:|:-----:|:-----------------------------:|
-| 1  | 2      | 0 0   | 0 1                           |
+|:--:|:------:|:-----:|:---------------------------------------------:|
+| 1  | 2      | 0 0   | 0 1                                           |
 #### frame to read state of the potentiometer on pin A0:
 |id  |function|address of the first input|quantity of inputs to read  |
-|:--:|:------:|:-----:|:-----------------------------:|
-| 1  | 4      | 0 0   | 0 1                           |
+|:--:|:------:|:-----:|:---------------------------------------------:|
+| 1  | 4      | 0 0   | 0 1                                           |
 #### frame to read state of led on pin 13:
-|id  |function|address of the first input|quantity of outputs to read |
-|:--:|:------:|:-----:|:-----------------------------:|
-| 1 | 1 | 0 0 | 0 1 |
+|id  |function|address of the first output|quantity of outputs to read |
+|:--:|:------:|:-----:|:----------------------------------------------:|
+| 1 | 1 | 0 0 | 0 1                                                    |
 #### frame to read states of both potentiometer and value on address 1:
 |id  |function|address of the first input|quantity of inputs to read  |
-|:--:|:------:|:-----:|:-----------------------------:|
-| 1 | 4 | 0 0 | 0 2 |
+|:--:|:------:|:-----:|:---------------------------------------------:|
+| 1 | 4 | 0 0 | 0 2                                                   |
 ## About
 The library was written using following documents and sites:
 + MODBUS over Serial Line Specification and Implementation Guide V1.02
