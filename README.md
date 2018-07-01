@@ -14,10 +14,12 @@ The library expects full RTU frames consisting of:
 + device ID (1 byte)
 + function ID (1 byte)
 + data (n bytes)
-+ crc (2 bytes)
++ crc (2 bytes)*
 
-Also, the library is able to detect invalid request frame and respond to it with an adequate exception frame.
-
+Also, the library is able to detect invalid request frame and respond to it with an adequate exception frame.<br />
+<br />
+*CRC can be disabled <br />
+<br />
 ## Usage
 #### MSlave variable initializer:
 ```cpp
@@ -66,8 +68,9 @@ uint16_t analogRead(uint16_t address, bool mode);
 ```
 **address** - position in specified array <br />
 **mode:** 
-+ INPUT - things sent from client devices
-+ OUTPUT - things written by using analogWrite function
++ INPUT - input array / things sent from client devices
++ OUTPUT - output array / things written by using analogWrite function
+<br />
 
 #### Write to digital/analog output array:
 ```cpp
@@ -75,9 +78,8 @@ void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
 ```
 **address** - position in specified array <br />
-**value** - value to be written
+**value** - value to be written<br />
 <br />
-
 
 #### Enable or disable CRC in request/response/exception frames:
 ```cpp
@@ -87,13 +89,14 @@ void enableCRC();
 CRC is enabled by default.<br />
 <br />
 
-#### Change standard of serial communication
+#### Change the standard of serial communication
 ```cpp
 void useUART();
 void useRS485(void (*actAsTransmitter)(bool));
 ```
 UART is enabled by default.<br />
-Due to variety of uart <--> RS485 converters you need to provide separate function that controls direction of your converter<br />
+<br />
+Due to variety of uart <-> RS485 converters you need to provide separate function that controls the direction of your converter<br />
 This function should be a type of void and should expect one boolean parameter.<br />
 When this parameter is true, your function should set the converter into transmitter. Otherwise, when this parameter is false, your function should set the converter into receiver. i.e:<br />
 
@@ -162,7 +165,7 @@ void loop()
 }
 ```
 #### Request frames for this example:
-Note 1: values in frames below are raw bytes, not ascii characters so you should use functions to read/write binary data, not characters. i.e if you send request frames from other Arduino board, you should use Serial.write() instead of Serial.print()
+Note: values in frames below are raw bytes, not ascii characters so you should use functions to read/write binary data, not characters. i.e if you send request frames from other Arduino board, you should use Serial.write() instead of Serial.print()
 
 ##### frame to turn on led on pin 13:
 |id  |function|address|value  |
