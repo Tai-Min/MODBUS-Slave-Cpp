@@ -114,7 +114,6 @@ void setup()
 }
 
 ```
-<br />
 
 ## Example
 ```cpp
@@ -165,7 +164,7 @@ void loop()
 }
 ```
 #### Request frames for this example:
-Note: values in frames below are raw bytes, not ascii characters so you should use functions to read/write binary data, not characters. i.e if you send request frames from other Arduino board, you should use Serial.write() instead of Serial.print()
+Note: values in frames below are raw bytes, not ascii characters so you should use functions to read/write binary data, not characters. i.e if you send your request frames from other Arduino board, you should use Serial.write() instead of Serial.print()
 
 ##### frame to turn on led on pin 13:
 |id  |function|address|value  |
