@@ -22,30 +22,41 @@ Also, the library is able to detect invalid request frame and respond to it with
 #### MSlave variable initializer:
 ```cpp
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
-MSlave(uint8_t id, HardwareSerial *serial);
+MSlave;
 ```
 **dil** - length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
 **dol** - length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
 **ail** - length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
 **aol** - length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
-**id** - unique id of the server <br />
-**serial** - address to Arduino's HardwareSerial object 
 <br />
 
-#### Enable or disable CRC in request/response/exception frames:
+#### Start MODBUS server
 ```cpp
-void disableCRC();
-void enableCRC();
+void begin(uint8_t id, HardwareSerial *S);
 ```
-CRC is enabled by default.
+**id** - unique id of the server <br />
+**serial** - address to Arduino's HardwareSerial object <br />
 <br />
 
-#### Check if there is a request frame in serial buffer and parse it:
+#### Stop MODBUS server
+```cpp
+void end();
+```
+
+#### Check whether there is data pending to be processed by the server
 ```cpp
 bool available();
 ```
-returns true only if one of eight rtu frames has been successfully processed <br />
-This function should be used as often as possible to provide responsive and dependable server.
+returns true only when there is data pending to be processed by this server<br />
+<br />
+
+#### Process pending data:
+```cpp
+uint8_t read();
+```
+returns function code of the processed frame<br />
+or 0 when there was no data / error occured / invalid request happened<br />
+This function should be used as often as possible along with available() to provide responsive and dependable server.<br />
 <br />
 
 #### Read from digital/analog input/output array:
@@ -67,6 +78,41 @@ void analogWrite(uint16_t address, uint16_t value);
 **value** - value to be written
 <br />
 
+
+#### Enable or disable CRC in request/response/exception frames:
+```cpp
+void disableCRC();
+void enableCRC();
+```
+CRC is enabled by default.<br />
+<br />
+
+#### Change standard of serial communication
+```cpp
+void useUART();
+void useRS485(void (*actAsTransmitter)(bool));
+```
+UART is enabled by default.<br />
+Due to variety of uart <--> RS485 converters you need to provide separate function that controls direction of your converter<br />
+This function should be a type of void and should expect one boolean parameter.<br />
+When this parameter is true, your function should set the converter into transmitter. Otherwise, when this parameter is false, your function should set the converter into receiver. i.e:<br />
+
+```cpp
+void foo(bool t)
+{
+  digitalWrite(13,t); //when pin 13 is high, the converter act as transmitter
+}
+
+void setup()
+{
+  ...
+  server.useRS485(foo);
+  ...
+}
+
+```
+<br />
+
 ## Example
 ```cpp
 #include "MSlave.h"
@@ -85,7 +131,7 @@ int deviceID = 1;
 //addresses works just like arrays
 //so if you have 2 analog outputs, you can access adresses from 0 to 1
 //if you have 40 analog inputs, you can access adresses from 0 to 39 etc
-MSlave<1, 1, 1, 2> server(deviceID, &Serial);//initialize slave device
+MSlave<1, 1, 1, 2> server;//initialize slave device
 
 void setup()
 {
@@ -96,12 +142,14 @@ void setup()
   server.disableCRC();//no need for crc check in this example
   Serial.begin(115200);
   Serial.setTimeout(15);
+  server.begin(deviceID, &Serial);//start modbus server
 }
 
 void loop()
 {
-  if (server.available())//check whether some successfull data exchange happened with this device
+  if (server.available())//check whether master sent some data
   {
+    int result = server.read();//process data from master and return code of the processed function or 0 when there was no data / error occured / invalid request happened
     digitalWrite(ledPin, server.digitalRead(0, INPUT));//digitalRead digital inputs array data received from client devices
     analogWrite(pwmLedPin, server.analogRead(0, INPUT));//analogRead analog inputs array data received from client devices
     server.digitalWrite(0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
@@ -113,27 +161,30 @@ void loop()
   }
 }
 ```
-#### frame to turn on led on pin 13:
+#### Request frames for this example:
+Note 1: values in frames below are raw bytes, not ascii characters so you should use functions to read/write binary data, not characters. i.e if you send request frames from other Arduino board, you should use Serial.write() instead of Serial.print()
+
+##### frame to turn on led on pin 13:
 |id  |function|address|value  |
 |:--:|:------:|:-----:|:-----:|
 |1   |5       |0 0    |255 0  |
-#### frame to change light intensity of pwm led on pin 11:
+##### frame to change light intensity of pwm led on pin 11:
 |id  |function|address|value  |
 |:--:|:------:|:-----:|:-----:|
 | 1  | 6      | 0 0   | 0 128 |
-#### frame to read state of the button on pin 3:
+##### frame to read state of the button on pin 3:
 |id  |function|address of the first input|quantity of inputs to read  |
 |:--:|:------:|:-----:|:---------------------------------------------:|
 | 1  | 2      | 0 0   | 0 1                                           |
-#### frame to read state of the potentiometer on pin A0:
+##### frame to read state of the potentiometer on pin A0:
 |id  |function|address of the first input|quantity of inputs to read  |
 |:--:|:------:|:-----:|:---------------------------------------------:|
 | 1  | 4      | 0 0   | 0 1                                           |
-#### frame to read state of led on pin 13:
+##### frame to read state of led on pin 13:
 |id  |function|address of the first output|quantity of outputs to read |
 |:--:|:------:|:-----:|:----------------------------------------------:|
 | 1 | 1 | 0 0 | 0 1                                                    |
-#### frame to read states of both potentiometer and value on address 1:
+##### frame to read states of both potentiometer and value on address 1:
 |id  |function|address of the first input|quantity of inputs to read  |
 |:--:|:------:|:-----:|:---------------------------------------------:|
 | 1 | 4 | 0 0 | 0 2                                                   |
