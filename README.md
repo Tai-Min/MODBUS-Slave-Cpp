@@ -34,10 +34,10 @@ MSlave;
 
 #### Start MODBUS server
 ```cpp
-void begin(uint8_t id, HardwareSerial *S);
+void begin(uint8_t id, HardwareSerial S);
 ```
 **id** - unique id of the server <br />
-**serial** - address to Arduino's HardwareSerial object <br />
+**S** - Arduino's HardwareSerial object <br />
 <br />
 
 #### Stop MODBUS server
@@ -144,7 +144,7 @@ void setup()
   server.disableCRC();//no need for crc check in this example
   Serial.begin(115200);
   Serial.setTimeout(15);
-  server.begin(deviceID, &Serial);//start modbus server
+  server.begin(deviceID, Serial);//start modbus server
 }
 
 void loop()
