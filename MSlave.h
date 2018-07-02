@@ -44,7 +44,7 @@ class MSlave
 
     //enable this slave
     //this slave will be enabled only if id is a valid one and S points to non nullptr
-    void begin(uint8_t id_, HardwareSerial *S_);
+    void begin(uint8_t id_, HardwareSerial &S_);
 
     //disable this slave
     void end();
@@ -501,10 +501,10 @@ MSlave<DQSize, DISize, AQSize, AISize>::MSlave()
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::begin(uint8_t id_, HardwareSerial *S_)
+void MSlave<DQSize, DISize, AQSize, AISize>::begin(uint8_t id_, HardwareSerial &S_)
 {
     id = id_;
-    S = S_;
+    S = &S_;
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
