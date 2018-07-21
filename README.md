@@ -64,7 +64,7 @@ This function should be used as often as possible along with available() to prov
 #### Read from digital/analog input/output array:
 ```cpp
 bool digitalRead(bool type, uint16_t address);
-uint16_t analogRead(bool type, uint16_t address; 
+uint16_t analogRead(bool type, uint16_t address); 
 ```
 **type:** 
 + INPUT - input array / things sent from client devices
