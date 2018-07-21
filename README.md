@@ -68,7 +68,8 @@ uint16_t analogRead(bool type, uint16_t address;
 ```
 **type:** 
 + INPUT - input array / things sent from client devices
-+ OUTPUT - output array / things written by using analogWrite function
++ OUTPUT - output array / things written by using analogWrite function<br />
+
 **address** - position in specified array <br />
 <br />
 
