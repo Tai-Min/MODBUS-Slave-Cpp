@@ -69,7 +69,7 @@ class MSlave
     //mode OUTPUT to read input
     //because coil is an input for arduino server and output for the client
     //and input is an output for arduino server and input for the client
-    bool digitalRead(uint16_t addr, bool mode);
+    bool digitalRead(bool type, uint16_t addr);
 
     //write inputs only
     //input is an output for arduino server and input for the client
@@ -80,7 +80,7 @@ class MSlave
     //mode OUTPUT to read input register
     //because holding register is an input for arduino server and output for the client
     //and input register is an output for arduino server and input for the client
-    uint16_t analogRead(uint16_t addr, bool mode);
+    uint16_t analogRead(bool type, uint16_t addr);
 
     //write input registers only
     //input register is an output for arduino server and input for the client
@@ -549,9 +549,9 @@ void MSlave<DQSize, DISize, AQSize, AISize>::useRS485(void (*actAsTransmitter_)(
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-bool MSlave<DQSize, DISize, AQSize, AISize>::digitalRead(uint16_t addr, bool mode)
+bool MSlave<DQSize, DISize, AQSize, AISize>::digitalRead(bool type, uint16_t addr) 
 {
-    if (mode == INPUT)
+    if (type == INPUT)
     {
         return DQ[addr];
     }
@@ -568,9 +568,9 @@ void MSlave<DQSize, DISize, AQSize, AISize>::digitalWrite(uint16_t addr, bool va
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint16_t MSlave<DQSize, DISize, AQSize, AISize>::analogRead(uint16_t addr, bool mode)
+uint16_t MSlave<DQSize, DISize, AQSize, AISize>::analogRead(bool type, uint16_t addr)
 {
-    if (mode == INPUT)
+    if (type == INPUT)
     {
         return AQ[addr];
     }
