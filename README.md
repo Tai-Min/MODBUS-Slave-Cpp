@@ -27,7 +27,7 @@ Also, the library is able to detect invalid request frame and respond to it with
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
 MSlave;
 ```
-+ **dil:** - Length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
++ **dil:** Length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
 + **dol:** Length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
 + **ail:** Length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
 + **aol:** Length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
