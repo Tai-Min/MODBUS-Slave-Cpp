@@ -27,18 +27,18 @@ Also, the library is able to detect invalid request frame and respond to it with
 template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
 MSlave;
 ```
-**dil** - length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
-**dol** - length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
-**ail** - length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
-**aol** - length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
++ **dil:** - Length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
++ **dol:** Length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
++ **ail:** Length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
++ **aol:** Length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
 <br />
 
 ### Start MODBUS server
 ```cpp
 void begin(uint8_t id, HardwareSerial S);
 ```
-**id:** unique id of the server <br />
-**S:** Arduino's HardwareSerial object <br />
++ **id:** Unique id of the server <br />
++ **S:** Arduino's HardwareSerial object <br />
 <br />
 
 ### Stop MODBUS server
@@ -51,15 +51,14 @@ void end();
 ```cpp
 bool available();
 ```
-returns true only when there is data pending to be processed by this server<br />
+**returns:** True only when there is data pending to be processed by this server<br />
 <br />
 
 ### Process pending data:
 ```cpp
 uint8_t read();
 ```
-returns function code of the processed frame<br />
-or 0 when there was no data / error occured / invalid request happened<br />
++ **returns:** Function code of the processed frame or 0 when there was no data / error occured / invalid request happened
 This function should be used as often as possible along with available() to provide responsive and dependable server.<br />
 <br />
 
@@ -68,11 +67,10 @@ This function should be used as often as possible along with available() to prov
 bool digitalRead(bool type, uint16_t address);
 uint16_t analogRead(bool type, uint16_t address); 
 ```
-**type:** 
-+ INPUT - input array / things sent from client devices
-+ OUTPUT - output array / things written by using analogWrite function<br />
-
-**address:** position in specified array <br />
++ **type:** 
+  - INPUT - Input array / things sent from client devices
+  - OUTPUT - Output array / things written by using analogWrite function<br />
++ **address:** Position in specified array <br />
 <br />
 
 ### Write to digital/analog output array:
@@ -80,8 +78,8 @@ uint16_t analogRead(bool type, uint16_t address);
 void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
 ```
-**address:** position in specified array <br />
-**value:** value to be written<br />
+**address:** Position in specified array <br />
+**value:** Value to be written<br />
 <br />
 
 ### Enable or disable CRC in request/response/exception frames:
@@ -95,8 +93,10 @@ CRC is enabled by default.<br />
 ### Change the standard of serial communication
 ```cpp
 void useUART();
-void useRS485(void (*actAsTransmitter)(bool));
+void useRS485(void (*actAsTransmitter)(bool) actAsTransmitter);
 ```
++ **actAsTransmitter:** Pointer to function that is used to control RS485 converter's direction.
+
 UART is enabled by default.<br />
 <br />
 Due to variety of uart <-> RS485 converters you need to provide separate function that controls the direction of your converter<br />
