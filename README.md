@@ -24,13 +24,13 @@ Also, the library is able to detect invalid request frame and respond to it with
 ## Usage
 ### MSlave variable initializer:
 ```cpp
-template <uint16_t dil, uint16_t dol, uint16_t ail, uint16_t aol>
+template <uint16_t dis, uint16_t dos, uint16_t ais, uint16_t aos>
 MSlave;
 ```
-+ **dil:** Length of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
-+ **dol:** Length of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
-+ **ail:** Length of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
-+ **aol:** Length of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
++ **dis:** Size of digital inputs array (MODBUS coils) - read only for the server, read/write for the client<br /> 
++ **dos:** Size of digital outputs array (MODBUS inputs) - read/write for the server, read only for the client<br />
++ **ais:** Size of analog inputs array (MODBUS holding registers) - read only for the server, read/write for the client<br />
++ **aos:** Size of analog outputs array (MODBUS input registers) - read/write for the server, read only for the client<br />
 <br />
 
 ### Start MODBUS server
@@ -51,7 +51,7 @@ void end();
 ```cpp
 bool available();
 ```
-**returns:** True only when there is data pending to be processed by this server<br />
++ **returns:** True only when there is data pending to be processed by this server<br />
 <br />
 
 ### Process pending data:
@@ -63,6 +63,7 @@ This function should be used as often as possible along with available() to prov
 <br />
 
 ### Read from digital/analog input/output array:
+#### 1. Arduino naming convention
 ```cpp
 bool digitalRead(bool type, uint16_t address);
 uint16_t analogRead(bool type, uint16_t address); 
@@ -71,15 +72,39 @@ uint16_t analogRead(bool type, uint16_t address);
   - INPUT - Input array / things sent from client devices
   - OUTPUT - Output array / things written by using analogWrite function<br />
 + **address:** Position in specified array <br />
+
++ **returns:** Value stored under given address
+<br />
+
+***
+#### 2. MODBUS naming convention (TODO)
+```cpp
+bool readCoil(uint16_t address); //same as digitalRead(INPUT, address);
+bool readInput(uint16_t address);// same as digitalRead(OUTPUT, address);
+uint16_t readHoldingRegister(uint16_t address);// same as analogRead(INPUT, address);
+uint16_t readInputRegister(uint16_t address);//same as analogRead(OUTPUT, address);
+```
++ **address:** Position in specified array <br />
 <br />
 
 ### Write to digital/analog output array:
+#### 1. Arduino naming convention
 ```cpp
 void digitalWrite(uint16_t address, bool value);
 void analogWrite(uint16_t address, uint16_t value);
 ```
-**address:** Position in specified array <br />
-**value:** Value to be written<br />
++ **address:** Position in specified array <br />
++ **value:** Value to be written<br />
+<br />
+
+***
+#### 2. MODBUS naming convention (TODO)
+```cpp
+void writeInput(uint16_t address, bool value);//same as digitalWrite(uint16_t address, bool value);
+void writeInputRegister(uint16_t address, uint16_t value);//same as analogWrite(uint16_t address, uint16_t value);
+```
++ **address:** Position in specified array <br />
++ **value:** Value to be written<br />
 <br />
 
 ### Enable or disable CRC in request/response/exception frames:
