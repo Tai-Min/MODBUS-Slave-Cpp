@@ -1,0 +1,3 @@
+[submodule "unit/Boost-Serial-Port"]
+	path = unit/Boost-Serial-Port
+	url = https://github.com/Tai-Min/Boost-Serial-Port.git

@@ -86,6 +86,13 @@ class MSlave
     //input register is an output for arduino server and input for the client
     void analogWrite(uint16_t addr, uint16_t val);
 
+    void writeInput(uint16_t address, bool value);             //same as digitalWrite(uint16_t address, bool value);
+    void writeInputRegister(uint16_t address, uint16_t value); //same as analogWrite(uint16_t address, uint16_t value);
+    bool readCoil(uint16_t address);                           //same as digitalRead(INPUT, address);
+    bool readInput(uint16_t address);                          //same as digitalRead(OUTPUT, address);
+    uint16_t readHoldingRegister(uint16_t address);            //same as analogRead(INPUT, address);
+    uint16_t readInputRegister(uint16_t address);              //same as analogRead(OUTPUT, address);
+
     //read data from Serial S and process it
     //returns function code when data was successfully processed
     //returns 0 when there was no data / error occured / invalid request happened
@@ -147,14 +154,14 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t
         return; //do not send anything for broadcast
 
     uint8_t lcrc, hcrc;
-    if(!crcDisabled)
+    if (!crcDisabled)
     {
         uint16_t computedcrc = crc(tab, length);
         lcrc = toLowByte(computedcrc);
         hcrc = toHighByte(computedcrc);
     }
 
-    if(!uartUsed && actAsTransmitter != nullptr)
+    if (!uartUsed && actAsTransmitter != nullptr)
         actAsTransmitter(true);
     for (auto i = 0; i < length; i++)
     {
@@ -165,7 +172,7 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t
         S->write(lcrc);
         S->write(hcrc);
     }
-    if(!uartUsed && actAsTransmitter != nullptr)
+    if (!uartUsed && actAsTransmitter != nullptr)
         actAsTransmitter(false);
 }
 
@@ -549,7 +556,7 @@ void MSlave<DQSize, DISize, AQSize, AISize>::useRS485(void (*actAsTransmitter_)(
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-bool MSlave<DQSize, DISize, AQSize, AISize>::digitalRead(bool type, uint16_t addr) 
+bool MSlave<DQSize, DISize, AQSize, AISize>::digitalRead(bool type, uint16_t addr)
 {
     if (type == INPUT)
     {
@@ -587,6 +594,42 @@ void MSlave<DQSize, DISize, AQSize, AISize>::analogWrite(uint16_t addr, uint16_t
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+void MSlave<DQSize, DISize, AQSize, AISize>::writeInput(uint16_t address, bool value)
+{
+    digitalWrite(address,value);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+void MSlave<DQSize, DISize, AQSize, AISize>::writeInputRegister(uint16_t address, uint16_t value)
+{
+    analogWrite(address,value);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+bool MSlave<DQSize, DISize, AQSize, AISize>::readCoil(uint16_t address)
+{
+    digitalRead(INPUT,address);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+bool MSlave<DQSize, DISize, AQSize, AISize>::readInput(uint16_t address)
+{
+    digitalRead(OUTPUT, address);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+uint16_t MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint16_t address)
+{
+    analogRead(INPUT, address);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+uint16_t MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint16_t address)
+{
+    analogRead(OUTPUT, address);
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
 {
     if (!available())
@@ -612,7 +655,7 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
             S->flush();
             return 0;
         }
-        commandLength -= MODBUS_CRC_BYTE_COUNT;//ignore crc bytes in command from now
+        commandLength -= MODBUS_CRC_BYTE_COUNT; //ignore crc bytes in command from now
     }
     else //validate without CRC
     {
@@ -623,13 +666,13 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
         }
     }
 
-    if (command[MODBUS_ID] != MODBUS_ID_BROADCAST && command[MODBUS_ID] != id)//data not designated for this slave
+    if (command[MODBUS_ID] != MODBUS_ID_BROADCAST && command[MODBUS_ID] != id) //data not designated for this slave
     {
         S->flush();
         return 0;
     }
 
-    //check if data contains minimal amount of bytes for given command 
+    //check if data contains minimal amount of bytes for given command
     if ((command[MODBUS_FUNCTION_CODE] >= MODBUS_READ_COIL_STATUS && command[MODBUS_FUNCTION_CODE] <= MODBUS_PRESET_SINGLE_REGISTER && commandLength != 6) ||
         (command[MODBUS_FUNCTION_CODE] == MODBUS_FORCE_MULTIPLE_COILS && commandLength < 7) ||
         (command[MODBUS_FUNCTION_CODE] == MODBUS_PRESET_MULTIPLE_REGISTERS && commandLength < 7))

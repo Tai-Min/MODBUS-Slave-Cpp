@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/mateusz/github/MSlave/unit/./Boost-Serial-Port/BoostSerial.h
+array
+-
+vector
+-
+string
+-
+thread
+-
+mutex
+-
+sstream
+-
+iomanip
+-
+bitset
+-
+boost/asio.hpp
+-
+
+/home/mateusz/github/MSlave/unit/gtest.cpp
+thread
+-
+gtest/gtest.h
+-
+./Boost-Serial-Port/BoostSerial.h
+/home/mateusz/github/MSlave/unit/./Boost-Serial-Port/BoostSerial.h
+MSlave.h
+/home/mateusz/github/MSlave/unit/MSlave.h
+

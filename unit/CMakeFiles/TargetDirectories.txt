@@ -1,0 +1,3 @@
+/home/mateusz/github/MSlave/unit/CMakeFiles/rebuild_cache.dir
+/home/mateusz/github/MSlave/unit/CMakeFiles/rungtest.dir
+/home/mateusz/github/MSlave/unit/CMakeFiles/edit_cache.dir
