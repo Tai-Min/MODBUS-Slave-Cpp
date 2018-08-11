@@ -77,11 +77,11 @@ uint16_t analogRead(bool type, uint16_t address);
 <br />
 
 ***
-#### 2. MODBUS naming convention (TODO)
+#### 2. MODBUS naming convention
 ```cpp
 bool readCoil(uint16_t address); //same as digitalRead(INPUT, address);
-bool readInput(uint16_t address);// same as digitalRead(OUTPUT, address);
-uint16_t readHoldingRegister(uint16_t address);// same as analogRead(INPUT, address);
+bool readInput(uint16_t address);//same as digitalRead(OUTPUT, address);
+uint16_t readHoldingRegister(uint16_t address);//same as analogRead(INPUT, address);
 uint16_t readInputRegister(uint16_t address);//same as analogRead(OUTPUT, address);
 ```
 + **address:** Position in specified array <br />
@@ -98,7 +98,7 @@ void analogWrite(uint16_t address, uint16_t value);
 <br />
 
 ***
-#### 2. MODBUS naming convention (TODO)
+#### 2. MODBUS naming convention
 ```cpp
 void writeInput(uint16_t address, bool value);//same as digitalWrite(uint16_t address, bool value);
 void writeInputRegister(uint16_t address, uint16_t value);//same as analogWrite(uint16_t address, uint16_t value);
