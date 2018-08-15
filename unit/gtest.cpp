@@ -70,6 +70,7 @@ TEST(MSlaveRead, validFrames)
     ASSERT_EQ(std::vector<uint8_t>({1, 2, 1, 21}), s.readBytes());
 
     //read status of 20 holding resisters starting from address 0
+    //there are 20 holding registers so reading 0-19 is okay
     s.write({1, 3, 0, 0, 0, 20});
     while (!s.available())
         ;
