@@ -53,10 +53,10 @@ class MSlave
     bool available();
 
     //enable CRC in request/response/exception frames
-    void enableCRC();
+    void enableCRC(){crcDisabled = 0;}
 
     //disable CRC in request/response/exception frames
-    void disableCRC();
+    void disableCRC(){crcDisabled = 1;}
 
     //use standard serial
     void useUART();
@@ -504,18 +504,6 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::available()
     if (S == nullptr || id < MODBUS_ID_MIN || id > MODBUS_ID_MAX)
         return 0;
     return (S->available() > 0);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::enableCRC()
-{
-    crcDisabled = 0;
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::disableCRC()
-{
-    crcDisabled = 1;
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
