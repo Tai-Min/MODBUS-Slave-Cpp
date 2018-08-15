@@ -22,10 +22,10 @@ class MSlave
 
     HardwareSerial *S = nullptr;
 
-    uint8_t toError(uint8_t code);
-    uint16_t toWord(uint8_t H, uint8_t L);
-    uint8_t toHighByte(uint16_t word);
-    uint8_t toLowByte(uint16_t word);
+    uint8_t toError(uint8_t code) { return code + MODBUS_ERR_OFFSET; }
+    uint16_t toWord(uint8_t H, uint8_t L) { return ((uint16_t)H << MODBUS_BYTE) | L; }
+    uint8_t toHighByte(uint16_t word) { return (word >> MODBUS_BYTE); }
+    uint8_t toLowByte(uint16_t word) { return word; }
 
     uint16_t crc(uint8_t command[], uint8_t commandLength);
     void sendResponse(uint8_t tab[], uint8_t length);
@@ -73,7 +73,7 @@ class MSlave
 
     //write inputs only
     //input is an output for arduino server and input for the client
-    void digitalWrite(uint16_t addr, bool val);
+    void digitalWrite(uint16_t addr, bool val) { DI[addr] = val; }
 
     //read holding register or input register
     //mode INPUT to read holding register
@@ -84,44 +84,21 @@ class MSlave
 
     //write input registers only
     //input register is an output for arduino server and input for the client
-    void analogWrite(uint16_t addr, uint16_t val);
+    void analogWrite(uint16_t addr, uint16_t val) { AI[addr] = val; }
 
-    void writeInput(uint16_t address, bool value);             //same as digitalWrite(uint16_t address, bool value);
-    void writeInputRegister(uint16_t address, uint16_t value); //same as analogWrite(uint16_t address, uint16_t value);
-    bool readCoil(uint16_t address);                           //same as digitalRead(INPUT, address);
-    bool readInput(uint16_t address);                          //same as digitalRead(OUTPUT, address);
-    uint16_t readHoldingRegister(uint16_t address);            //same as analogRead(INPUT, address);
-    uint16_t readInputRegister(uint16_t address);              //same as analogRead(OUTPUT, address);
+    //MODBUS naming convention for functions
+    void writeInput(uint16_t address, bool value) { digitalWrite(address, value); }
+    void writeInputRegister(uint16_t address, uint16_t value) { analogWrite(address, value); }
+    bool readCoil(uint16_t address) { digitalRead(INPUT, address); }
+    bool readInput(uint16_t address) { digitalRead(OUTPUT, address); }
+    uint16_t readHoldingRegister(uint16_t address) { analogRead(INPUT, address); }
+    uint16_t readInputRegister(uint16_t address) { analogRead(OUTPUT, address); } //same as analogRead(OUTPUT, address);
 
     //read data from Serial S and process it
     //returns function code when data was successfully processed
     //returns 0 when there was no data / error occured / invalid request happened
     uint8_t read();
 };
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint8_t MSlave<DQSize, DISize, AQSize, AISize>::toError(uint8_t code)
-{
-    return code + MODBUS_ERR_OFFSET;
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint16_t MSlave<DQSize, DISize, AQSize, AISize>::toWord(uint8_t H, uint8_t L)
-{
-    return ((uint16_t)H << MODBUS_BYTE) | L;
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint8_t MSlave<DQSize, DISize, AQSize, AISize>::toHighByte(uint16_t word)
-{
-    return (word >> MODBUS_BYTE);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint8_t MSlave<DQSize, DISize, AQSize, AISize>::toLowByte(uint16_t word)
-{
-    return word;
-}
 
 //https://stackoverflow.com/questions/19347685/calculating-modbus-rtu-crc-16
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
@@ -185,13 +162,13 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= DQSize || DQSize == 0) //check if illegal adress was selected
+    if (addr >= DQSize || DQSize == 0 || addr + quantity > DQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_COIL_STATUS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > DQSize || quantity < 1) //check if illegal number of outputs was selected
+    else if (quantity < 1) //check if illegal number of outputs was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_COIL_STATUS), MODBUS_ERR_ILLEGAL_DATA};
         sendResponse(tab, 3);
@@ -238,13 +215,13 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= DISize || DISize == 0) //check if illegal adress was selected
+    if (addr >= DISize || DISize == 0 || addr + quantity > DISize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_STATUS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > DISize || quantity < 1) //check if illegal number of inputs was selected
+    else if (quantity < 1) //check if illegal number of inputs was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_STATUS), MODBUS_ERR_ILLEGAL_DATA};
         sendResponse(tab, 3);
@@ -291,13 +268,13 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint8_t id, uin
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= AQSize || AQSize == 0) //check if illegal adress was selected
+    if (addr >= AQSize || AQSize == 0 || addr + quantity > AQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_HOLDING_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > AQSize || quantity < 1) //check if illegal number of output registers was selected
+    else if (quantity < 1) //check if illegal number of output registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_HOLDING_REGISTER), MODBUS_ERR_ILLEGAL_DATA};
         sendResponse(tab, 3);
@@ -335,13 +312,13 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint8_t id, uint8
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= AISize || AISize == 0) //check if illegal adress was selected
+    if (addr >= AISize || AISize == 0 || addr + quantity > AISize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > AISize || quantity < 1) //check if illegal number of input registers was selected
+    else if (quantity < 1) //check if illegal number of input registers was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTER), MODBUS_ERR_ILLEGAL_DATA};
         sendResponse(tab, 3);
@@ -427,15 +404,15 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::forceMultipleCoils(uint8_t id, uint
     if (lastByteQuantity != 0)
         desiredByteCount++;
 
-    if (addr >= DQSize || DQSize == 0) //check if illegal adress was selected
+    if (addr >= DQSize || DQSize == 0 || addr + quantity > DQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_FORCE_MULTIPLE_COILS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > DQSize || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
-    {
-        uint8_t tab[3] = {id, toError(MODBUS_FORCE_MULTIPLE_COILS), MODBUS_ERR_ILLEGAL_DATA};
+    else if (quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
+    {                                                                                                             //or if number of bytes required for given quntity is equal to byte count
+        uint8_t tab[3] = {id, toError(MODBUS_FORCE_MULTIPLE_COILS), MODBUS_ERR_ILLEGAL_DATA};                     //or if number of bytes after byte count is equal to byte count
         sendResponse(tab, 3);
         return 0;
     }
@@ -466,15 +443,15 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::forceMultipleRegisters(uint8_t id, 
 
     uint8_t desiredByteCount = quantity * 2;
 
-    if (addr >= AQSize || AQSize == 0) //check if illegal adress was selected
+    if (addr >= AQSize || AQSize == 0 || addr + quantity > AQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_PRESET_MULTIPLE_REGISTERS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
         return 0;
     }
-    else if (addr + quantity > AQSize || quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
-    {
-        uint8_t tab[3] = {id, toError(MODBUS_PRESET_MULTIPLE_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};
+    else if (quantity < 1 || desiredByteCount != byteCount || commandLength - MODBUS_BYTE_COUNT - 1 != byteCount) //check if illegal number of input registers was selected
+    {                                                                                                             //or if number of bytes required for given quntity is equal to byte count
+        uint8_t tab[3] = {id, toError(MODBUS_PRESET_MULTIPLE_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};                //or if number of bytes after byte count is equal to byte count
         sendResponse(tab, 3);
         return 0;
     }
@@ -569,12 +546,6 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::digitalRead(bool type, uint16_t add
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::digitalWrite(uint16_t addr, bool val)
-{
-    DI[addr] = val;
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 uint16_t MSlave<DQSize, DISize, AQSize, AISize>::analogRead(bool type, uint16_t addr)
 {
     if (type == INPUT)
@@ -585,48 +556,6 @@ uint16_t MSlave<DQSize, DISize, AQSize, AISize>::analogRead(bool type, uint16_t 
     {
         return AI[addr];
     }
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::analogWrite(uint16_t addr, uint16_t val)
-{
-    AI[addr] = val;
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::writeInput(uint16_t address, bool value)
-{
-    digitalWrite(address,value);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::writeInputRegister(uint16_t address, uint16_t value)
-{
-    analogWrite(address,value);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-bool MSlave<DQSize, DISize, AQSize, AISize>::readCoil(uint16_t address)
-{
-    digitalRead(INPUT,address);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-bool MSlave<DQSize, DISize, AQSize, AISize>::readInput(uint16_t address)
-{
-    digitalRead(OUTPUT, address);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint16_t MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint16_t address)
-{
-    analogRead(INPUT, address);
-}
-
-template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint16_t MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint16_t address)
-{
-    analogRead(OUTPUT, address);
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
