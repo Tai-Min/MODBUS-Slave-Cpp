@@ -3,3 +3,4 @@
 * allow to write coils and holding registers
 * add slave device busy exception
 * add readAsFloat and readAsDouble
+* update unit tests
