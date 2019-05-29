@@ -22,18 +22,18 @@ class MSlave
 
     HardwareSerial *S = nullptr;
 
-    uint8_t toError(uint8_t code) { return code + MODBUS_ERR_OFFSET; }
-    uint16_t toWord(uint8_t H, uint8_t L) { return ((uint16_t)H << MODBUS_BYTE) | L; }
-    uint8_t toHighByte(uint16_t word) { return (word >> MODBUS_BYTE); }
-    uint8_t toLowByte(uint16_t word) { return word; }
+    static uint8_t toError(uint8_t code) const { return code + MODBUS_ERR_OFFSET; }
+    static uint16_t toWord(uint8_t H, uint8_t L) const { return ((uint16_t)H << MODBUS_BYTE) | L; }
+    static uint8_t toHighByte(uint16_t word) const { return (word >> MODBUS_BYTE); }
+    static uint8_t toLowByte(uint16_t word) const { return word; }
 
-    uint16_t crc(uint8_t command[], uint8_t commandLength);
-    void sendResponse(uint8_t tab[], uint8_t length);
+    static uint16_t crc(uint8_t command[], uint8_t commandLength) const;
+    void sendResponse(uint8_t tab[], uint8_t length) const;
 
-    bool readCoilStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL);
-    bool readInputStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL);
-    bool readHoldingRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL);
-    bool readInputRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL);
+    bool readCoilStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL) const;
+    bool readInputStatus(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL) const;
+    bool readHoldingRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL) const;
+    bool readInputRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL) const;
     bool forceSingleCoil(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL);
     bool presetSingleRegister(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t valH, uint8_t valL);
     bool forceMultipleCoils(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
@@ -50,7 +50,7 @@ class MSlave
     void end();
 
     //check whether some data is pending in Serial S
-    bool available();
+    bool available() const;
 
     //enable CRC in request/response/exception frames
     void enableCRC(){crcDisabled = 0;}
@@ -102,7 +102,7 @@ class MSlave
 
 //https://stackoverflow.com/questions/19347685/calculating-modbus-rtu-crc-16
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-uint16_t MSlave<DQSize, DISize, AQSize, AISize>::crc(uint8_t command[], uint8_t commandLength)
+uint16_t MSlave<DQSize, DISize, AQSize, AISize>::crc(uint8_t command[], uint8_t commandLength) const
 {
     uint16_t crc = 0xFFFF;
     for (uint8_t pos = 0; pos < commandLength; pos++)
@@ -125,10 +125,10 @@ uint16_t MSlave<DQSize, DISize, AQSize, AISize>::crc(uint8_t command[], uint8_t 
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
-void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t length)
+void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t length) const
 {
     if (tab[MODBUS_ID] == MODBUS_ID_BROADCAST)
-        return; //do not send anything for broadcast
+        return; //do not answer when broadcast id has been received
 
     uint8_t lcrc, hcrc;
     if (!crcDisabled)
@@ -139,7 +139,8 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t
     }
 
     if (!uartUsed && actAsTransmitter != nullptr)
-        actAsTransmitter(true);
+        actAsTransmitter(true);//use function given by user to toggle rs485 into transmitter
+  
     for (auto i = 0; i < length; i++)
     {
         S->write(tab[i]);
@@ -149,8 +150,9 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint8_t
         S->write(lcrc);
         S->write(hcrc);
     }
+    //TODO: add wait for transfer complete here
     if (!uartUsed && actAsTransmitter != nullptr)
-        actAsTransmitter(false);
+        actAsTransmitter(false);//use function given by user to toggle rs485 into receiver
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
@@ -162,7 +164,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= DQSize || DQSize == 0 || addr + quantity > DQSize) //check if illegal adress was selected
+    if (addr >= DQSize || addr + quantity > DQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_COIL_STATUS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -176,29 +178,30 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
     }
 
     uint16_t currentAddr = addr;
-    uint8_t byteCount = quantity / MODBUS_BYTE;
-    if (quantity % MODBUS_BYTE != 0)
+    uint8_t byteCount = quantity / MODBUS_BYTE; //number of bytes to iterate over to read bits
+    if (quantity % MODBUS_BYTE != 0) //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
         byteCount++;
     uint8_t outputs[byteCount];
 
-    for (auto i = 0; i < byteCount; i++) //push output values to specified byte
+    for (uint8_t i = 0; i < byteCount; i++) //read one byte
     {
         outputs[i] = 0;
-        for (auto j = 0; j < MODBUS_BYTE; j++) //push output value to specified bit in byte
+        for (uint8_t j = 0; j < MODBUS_BYTE; j++) //read all bits in one byte
         {
-            outputs[i] |= (DQ[currentAddr] << j);
+            outputs[i] |= (DQ[currentAddr] << j);//push specified bit to output buffer
 
             currentAddr++;
-            if (currentAddr - addr >= quantity) //check if every selected output has been read
-                break;
+            if (currentAddr - addr >= quantity) //check if every selected output has been read and if so stop iterating
+                break;                          //should be true when quantity is not multiply of 8
         }
     }
 
+    //prepare response
     uint8_t tab[3 + byteCount];
     tab[0] = id;
     tab[1] = MODBUS_READ_COIL_STATUS;
     tab[2] = byteCount;
-    for (auto i = 0; i < byteCount; i++)
+    for (uint8_t i = 0; i < byteCount; i++)
     {
         tab[i + 3] = outputs[i];
     }
@@ -215,7 +218,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= DISize || DISize == 0 || addr + quantity > DISize) //check if illegal adress was selected
+    if (addr >= DISize || addr + quantity > DISize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_STATUS), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -229,29 +232,30 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
     }
 
     uint16_t currentAddr = addr;
-    uint8_t byteCount = quantity / 8;
-    if (quantity % MODBUS_BYTE != 0)
+    uint8_t byteCount = quantity / 8; //number of bytes to iterate over to read bits
+    if (quantity % MODBUS_BYTE != 0) //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
         byteCount++;
     uint8_t inputs[byteCount];
 
-    for (auto i = 0; i < byteCount; i++) //push input values to specified byte
+    for (uint8_t i = 0; i < byteCount; i++) //read one byte
     {
         inputs[i] = 0;
-        for (auto j = 0; j < MODBUS_BYTE; j++) //push input value to specified bit in byte
+        for (uint8_t j = 0; j < MODBUS_BYTE; j++) //push specified bit to output buffer
         {
             inputs[i] |= (DI[currentAddr] << j);
 
             currentAddr++;
-            if (currentAddr - addr >= quantity) //check if every selected input has been read
-                break;
+            if (currentAddr - addr >= quantity) //check if every selected output has been read and if so stop iterating
+                break;                          //should be true when quantity is not multiply of 8
         }
     }
 
+    //prepare response
     uint8_t tab[3 + byteCount];
     tab[0] = id;
     tab[1] = MODBUS_READ_INPUT_STATUS;
     tab[2] = byteCount;
-    for (auto i = 0; i < byteCount; i++)
+    for (uint8_t i = 0; i < byteCount; i++)
     {
         tab[i + 3] = inputs[i];
     }
@@ -268,7 +272,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint8_t id, uin
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= AQSize || AQSize == 0 || addr + quantity > AQSize) //check if illegal adress was selected
+    if (addr >= AQSize || addr + quantity > AQSize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_HOLDING_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -281,10 +285,10 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint8_t id, uin
         return 0;
     }
 
-    uint8_t byteCount = quantity * 2;
+    uint8_t byteCount = quantity * 2; //quantity is in number of registers (2 bytes per one)
     uint8_t valL[quantity];
     uint8_t valH[quantity];
-    for (auto i = 0; i < quantity; i++) //read every selected value into two bytes
+    for (uint8_t i = 0; i < quantity; i++) //read every register into two bytes
     {
         valL[i] = toLowByte(AQ[addr + i]);
         valH[i] = toHighByte(AQ[addr + i]);
@@ -294,7 +298,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint8_t id, uin
     tab[0] = id;
     tab[1] = MODBUS_READ_HOLDING_REGISTER;
     tab[2] = byteCount;
-    for (auto i = 0, j = 0; i < byteCount; i += 2, j++)
+    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++)
     {
         tab[i + 3] = valH[j];
         tab[i + 4] = valL[j];
@@ -312,7 +316,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint8_t id, uint8
     uint16_t addr = toWord(addrH, addrL);
     uint16_t quantity = toWord(quantityH, quantityL);
 
-    if (addr >= AISize || AISize == 0 || addr + quantity > AISize) //check if illegal adress was selected
+    if (addr >= AISize || addr + quantity > AISize) //check if illegal adress was selected
     {
         uint8_t tab[3] = {id, toError(MODBUS_READ_INPUT_REGISTER), MODBUS_ERR_ILLEGAL_ADDR};
         sendResponse(tab, 3);
@@ -325,20 +329,21 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint8_t id, uint8
         return 0;
     }
 
-    uint8_t byteCount = quantity * 2;
+    uint8_t byteCount = quantity * 2; //quantity is in number of registers (2 bytes per one)
     uint8_t valL[quantity];
     uint8_t valH[quantity];
-    for (auto i = 0; i < quantity; i++) //read every selected value into two bytes
+    for (uint8_t i = 0; i < quantity; i++) //read every register into two bytes
     {
         valL[i] = toLowByte(AI[addr + i]);
         valH[i] = toHighByte(AI[addr + i]);
     }
 
+    //prepare response
     uint8_t tab[3 + quantity];
     tab[0] = id;
     tab[1] = MODBUS_READ_INPUT_REGISTER;
     tab[2] = byteCount;
-    for (auto i = 0, j = 0; i < byteCount; i += 2, j++)
+    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++)
     {
         tab[i + 3] = valH[j];
         tab[i + 4] = valL[j];
