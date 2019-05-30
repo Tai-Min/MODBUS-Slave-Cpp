@@ -70,7 +70,7 @@ uint16_t analogRead(bool type, uint16_t address);
 ```
 + **type:** 
   - INPUT - Input array / things sent from client devices
-  - OUTPUT - Output array / things written by using analogWrite function<br />
+  - OUTPUT - Output array / things written by using digitalWrite or analogWrite function<br />
 + **address:** Position in specified array <br />
 
 + **returns:** Value stored under given address
