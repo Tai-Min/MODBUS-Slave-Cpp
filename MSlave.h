@@ -12,6 +12,8 @@ class MSlave
     bool crcDisabled = 0;
     uint8_t id = 255;
 
+    bool busy = 0;
+
     bool uartUsed = 1;
     void (*actAsTransmitter)(bool) = nullptr;
 
@@ -52,11 +54,14 @@ class MSlave
     //check whether some data is pending in Serial S
     bool available() const;
 
+    void setBusy() { busy = 0; }
+    void setIdle() { busy = 1; }
+
     //enable CRC in request/response/exception frames
-    void enableCRC(){crcDisabled = 0;}
+    void enableCRC() { crcDisabled = 0; }
 
     //disable CRC in request/response/exception frames
-    void disableCRC(){crcDisabled = 1;}
+    void disableCRC() { crcDisabled = 1; }
 
     //use standard serial
     void useUART();
@@ -73,7 +78,7 @@ class MSlave
 
     //write inputs only
     //input is an output for arduino server and input for the client
-    void digitalWrite(uint16_t addr, bool val) { DI[addr] = val; }
+    void digitalWrite(bool type, uint16_t addr, bool val);
 
     //read holding register or input register
     //mode INPUT to read holding register
@@ -84,11 +89,13 @@ class MSlave
 
     //write input registers only
     //input register is an output for arduino server and input for the client
-    void analogWrite(uint16_t addr, uint16_t val) { AI[addr] = val; }
+    void analogWrite(bool type, uint16_t addr, uint16_t val);
 
     //MODBUS naming convention for functions
-    void writeInput(uint16_t address, bool value) { digitalWrite(address, value); }
-    void writeInputRegister(uint16_t address, uint16_t value) { analogWrite(address, value); }
+    void writeCoil(uint16_t address, bool value) { digitalWrite(INPUT, address, value); }
+    void writeHoldingRegister(uint16_t address, uint16_t value) { analogWrite(INPUT, address, value); }
+    void writeInput(uint16_t address, bool value) { digitalWrite(OUTPUT, address, value); }
+    void writeInputRegister(uint16_t address, uint16_t value) { analogWrite(OUTPUT, address, value); }
     bool readCoil(uint16_t address) { digitalRead(INPUT, address); }
     bool readInput(uint16_t address) { digitalRead(OUTPUT, address); }
     uint16_t readHoldingRegister(uint16_t address) { analogRead(INPUT, address); }
@@ -139,8 +146,8 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint16_
     }
 
     if (!uartUsed && actAsTransmitter != nullptr)
-        actAsTransmitter(true);//use function given by user to toggle rs485 into transmitter
-  
+        actAsTransmitter(true); //use function given by user to toggle rs485 into transmitter
+
     for (uint16_t i = 0; i < length; i++)
     {
         S->write(tab[i]);
@@ -152,7 +159,7 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint16_
     }
     //TODO: add wait for transfer complete here
     if (!uartUsed && actAsTransmitter != nullptr)
-        actAsTransmitter(false);//use function given by user to toggle rs485 into receiver
+        actAsTransmitter(false); //use function given by user to toggle rs485 into receiver
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
@@ -179,7 +186,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
 
     uint16_t currentAddr = addr;
     uint8_t byteCount = quantity / MODBUS_BYTE; //number of bytes to iterate over to read bits
-    if (quantity % MODBUS_BYTE != 0) //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
+    if (quantity % MODBUS_BYTE != 0)            //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
         byteCount++;
     uint8_t outputs[byteCount];
 
@@ -188,7 +195,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
         outputs[i] = 0;
         for (uint8_t j = 0; j < MODBUS_BYTE; j++) //read all bits in one byte
         {
-            outputs[i] |= (DQ[currentAddr] << j);//push specified bit to current byte of output buffer
+            outputs[i] |= (DQ[currentAddr] << j); //push specified bit to current byte of output buffer
 
             currentAddr++;
             if (currentAddr - addr >= quantity) //check if every selected output has been read and if so stop iterating
@@ -233,7 +240,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
 
     uint16_t currentAddr = addr;
     uint8_t byteCount = quantity / MODBUS_BYTE; //number of bytes to iterate over to read bits
-    if (quantity % MODBUS_BYTE != 0) //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
+    if (quantity % MODBUS_BYTE != 0)            //quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits
         byteCount++;
     uint8_t inputs[byteCount];
 
@@ -329,7 +336,7 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint8_t id, uint8
         return 0;
     }
 
-    uint8_t byteCount = quantity * 2; //quantity is in number of registers (2 bytes per one) 
+    uint8_t byteCount = quantity * 2; //quantity is in number of registers (2 bytes per one)
     uint8_t valL[quantity];
     uint8_t valH[quantity];
     for (uint8_t i = 0; i < quantity; i++) //read every register into two bytes
@@ -417,8 +424,8 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::forceMultipleCoils(uint8_t id, uint
         return 0;
     }
     else if (quantity == 0 || quantity > MODBUS_MAX_COILS_TO_WRITE || requiredByteCount != byteCount || realNumberOfBytes != byteCount) //check if illegal number of input registers was selected
-    {                                                                                                             //or if number of bytes required for given quntity is equal to byte count
-        uint8_t tab[3] = {id, toError(MODBUS_FORCE_MULTIPLE_COILS), MODBUS_ERR_ILLEGAL_DATA};                     //or if number of bytes after byte count is equal to byte count
+    {                                                                                                                                   //or if number of bytes required for given quntity is equal to byte count
+        uint8_t tab[3] = {id, toError(MODBUS_FORCE_MULTIPLE_COILS), MODBUS_ERR_ILLEGAL_DATA};                                           //or if number of bytes after byte count is equal to byte count
         sendResponse(tab, 3);
         return 0;
     }
@@ -457,8 +464,8 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::forceMultipleRegisters(uint8_t id, 
         return 0;
     }
     else if (quantity == 0 || quantity > MODBUS_MAX_HREGISTERS_TO_WRITE || requiredByteCount != byteCount || realNumberOfBytes != byteCount) //check if illegal number of input registers was selected
-    {                                                                                                             //or if number of bytes required for given quntity is equal to byte count
-        uint8_t tab[3] = {id, toError(MODBUS_PRESET_MULTIPLE_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};                //or if number of bytes after byte count is equal to byte count
+    {                                                                                                                                        //or if number of bytes required for given quntity is equal to byte count
+        uint8_t tab[3] = {id, toError(MODBUS_PRESET_MULTIPLE_REGISTERS), MODBUS_ERR_ILLEGAL_DATA};                                           //or if number of bytes after byte count is equal to byte count
         sendResponse(tab, 3);
         return 0;
     }
@@ -553,10 +560,36 @@ uint16_t MSlave<DQSize, DISize, AQSize, AISize>::analogRead(bool type, uint16_t 
 }
 
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+void MSlave<DQSize, DISize, AQSize, AISize>::digitalWrite(bool type, uint16_t addr, bool val)
+{
+    if (type == INPUT)
+    {
+        DQ[addr] = val;
+    }
+    else
+    {
+        DI[addr] = val;
+    }
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
+void MSlave<DQSize, DISize, AQSize, AISize>::analogWrite(bool type, uint16_t addr, uint16_t val)
+{
+    if (type == INPUT)
+    {
+        AQ[addr] = val;
+    }
+    else
+    {
+        AI[addr] = val;
+    }
+}
+
+template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
 {
     if (!available())
-        return 0;//return nothing processed when there is no data pending
+        return 0; //return nothing processed when there is no data pending
 
     uint8_t command[MODBUS_MAX_FRAME_SIZE]; //should be bigger probably (The maximum size of a MODBUS RTU frame is 256 bytes. - MODBUS over Serial Line  Specification and Implementation Guide  V1.02)
     uint8_t commandLength = S->readBytes(command, MODBUS_MAX_FRAME_SIZE);
@@ -594,9 +627,17 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
         return 0; //return nothing processed if other slave was adressed
     }
 
+    if (busy)//server is busy so ignore command
+    {
+        uint8_t tab[3] = {command[MODBUS_ID], toError(command[MODBUS_FUNCTION_CODE]), MODBUS_ERR_SLAVE_BUSY};
+        sendResponse(tab, 3);
+        S->flush();
+        return 0;//return nothing processed if server is busy
+    }
+
     //check if data contains minimal amount of bytes for given command (without crc)
     if ((command[MODBUS_FUNCTION_CODE] >= MODBUS_READ_COIL_STATUS && command[MODBUS_FUNCTION_CODE] <= MODBUS_PRESET_SINGLE_REGISTER && commandLength != 6) /*6 bytes required for functions from MODBUS_READ_COIL_STATUS to MODBUS_PRESET_SINGLE_REGISTER*/ ||
-        (command[MODBUS_FUNCTION_CODE] == MODBUS_FORCE_MULTIPLE_COILS && commandLength < 8) /*minimum 8 bytes required for command MODBUS_FORCE_MULTIPLE_COILS*/||
+        (command[MODBUS_FUNCTION_CODE] == MODBUS_FORCE_MULTIPLE_COILS && commandLength < 8) /*minimum 8 bytes required for command MODBUS_FORCE_MULTIPLE_COILS*/ ||
         (command[MODBUS_FUNCTION_CODE] == MODBUS_PRESET_MULTIPLE_REGISTERS && commandLength < 9) /*minimum 9 bytes required for command MODBUS_PRESET_MULTIPLE_REGISTERS*/)
     {
         uint8_t tab[3] = {command[MODBUS_ID], toError(command[MODBUS_FUNCTION_CODE]), MODBUS_ERR_ILLEGAL_DATA};
@@ -605,7 +646,7 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
     }
 
     bool res = 0;
-    switch (command[MODBUS_FUNCTION_CODE])//perform command
+    switch (command[MODBUS_FUNCTION_CODE]) //perform command
     {
     case MODBUS_READ_COIL_STATUS:
         res = readCoilStatus(command[MODBUS_ID], command[MODBUS_ADDR_HIGH], command[MODBUS_ADDR_LOW], command[MODBUS_QUANTITY_HIGH], command[MODBUS_QUANTITY_LOW]);
@@ -638,8 +679,8 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
     }
     S->flush();
     if (res)
-        return command[MODBUS_FUNCTION_CODE];//return function code of performed function
-    return 0;//return 0 if function failed for some reason
+        return command[MODBUS_FUNCTION_CODE]; //return function code of performed function
+    return 0;                                 //return 0 if function failed for some reason
 }
 
 #endif

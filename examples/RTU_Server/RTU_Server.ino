@@ -35,11 +35,11 @@ void loop()
     int result = server.read();//process data from master and return code of the processed function or 0 when there was no data / error occured / invalid request happened
     digitalWrite(ledPin, server.digitalRead(INPUT, 0));//digitalRead digital inputs array data received from client devices
     analogWrite(pwmLedPin, server.analogRead(INPUT, 0));//analogRead analog inputs array data received from client devices
-    server.digitalWrite(0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
-    server.analogWrite(0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
+    server.digitalWrite(OUTPUT, 0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
+    server.analogWrite(OUTPUT, 0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
     if(server.digitalRead(OUTPUT, 0))//read buttons's state from digital outputs array
     {
-      server.analogWrite(1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
+      server.analogWrite(OUTPUT, 1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
     }
   }
 }

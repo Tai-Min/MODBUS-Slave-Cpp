@@ -87,12 +87,15 @@ uint16_t readInputRegister(uint16_t address);//same as analogRead(OUTPUT, addres
 + **address:** Position in specified array <br />
 <br />
 
-### Write to digital/analog output array:
+### Write to digital/analog input/output array:
 #### 1. Arduino naming convention
 ```cpp
-void digitalWrite(uint16_t address, bool value);
-void analogWrite(uint16_t address, uint16_t value);
+void digitalWrite(bool type, uint16_t address, bool value);
+void analogWrite(bool type, uint16_t address, uint16_t value);
 ```
++ **type:** 
+  - INPUT - Input array / things sent from client devices
+  - OUTPUT - Output array / things written by using digitalWrite or analogWrite function<br />
 + **address:** Position in specified array <br />
 + **value:** Value to be written<br />
 <br />
@@ -100,12 +103,25 @@ void analogWrite(uint16_t address, uint16_t value);
 ***
 #### 2. MODBUS naming convention
 ```cpp
-void writeInput(uint16_t address, bool value);//same as digitalWrite(uint16_t address, bool value);
-void writeInputRegister(uint16_t address, uint16_t value);//same as analogWrite(uint16_t address, uint16_t value);
+void writeCoil(uint16_t address, bool value);//same as digitalWrite(INPUT, address, value);
+void writeRegister(uint16_t address, uint16_t value);//same as analogWrite(INPUT, address, value);
+void writeInput(uint16_t address, bool value);//same as digitalWrite(OUTPUT, address, value);
+void writeInputRegister(uint16_t address, uint16_t value);//same as analogWrite(OUTPUT, address, value);
 ```
 + **address:** Position in specified array <br />
 + **value:** Value to be written<br />
 <br />
+
+### Set server busy or idle:
+```cpp
+void setBusy();
+void setIdle();
+```
+Server is idle by default.<br />
+
+When server is busy then it will ignore any incoming data and will respond with MODBUS_ERR_SLAVE_BUSY exception.<br />
+<br />
+
 
 ### Enable or disable CRC in request/response/exception frames:
 ```cpp
@@ -115,7 +131,7 @@ void enableCRC();
 CRC is enabled by default.<br />
 <br />
 
-### Change the standard of serial communication
+### Change standard of serial communication
 ```cpp
 void useUART();
 void useRS485(void (*actAsTransmitter)(bool) actAsTransmitter);
@@ -183,11 +199,11 @@ void loop()
     int result = server.read();//process data from master and return code of the processed function or 0 when there was no data / error occured / invalid request happened
     digitalWrite(ledPin, server.digitalRead(INPUT, 0));//digitalRead digital inputs array data received from client devices
     analogWrite(pwmLedPin, server.analogRead(INPUT, 0));//analogRead analog inputs array data received from client devices
-    server.digitalWrite(0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
-    server.analogWrite(0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
+    server.digitalWrite(OUTPUT, 0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
+    server.analogWrite(OUTPUT, 0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
     if(server.digitalRead(OUTPUT, 0))//read buttons's state from digital outputs array
     {
-      server.analogWrite(1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
+      server.analogWrite(OUTPUT, 1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
     }
   }
 }
