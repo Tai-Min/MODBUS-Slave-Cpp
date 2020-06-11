@@ -8,7 +8,7 @@
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
 class MSlave
 {
-  private:
+private:
     bool crcDisabled = 0;
     uint8_t id = 255;
 
@@ -41,69 +41,169 @@ class MSlave
     bool forceMultipleCoils(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
     bool forceMultipleRegisters(uint8_t id, uint8_t addrH, uint8_t addrL, uint8_t quantityH, uint8_t quantityL, uint8_t byteCount, uint8_t command[], uint8_t commandLength);
 
-  public:
+public:
+    /**
+    * @brief Class constructor.
+    */
     MSlave();
 
-    //enable this slave
-    //this slave will be enabled only if id is a valid one and S points to non nullptr
+    /**
+     * @brief Enable MODBUS server.
+     * 
+     * @param id_ ID of this server
+     * @param S_ HardwareSerial object.
+     */
     void begin(uint8_t id_, HardwareSerial &S_);
 
-    //disable this slave
+    /**
+     * @brief Disable MODBUS server.
+     */
     void end();
 
-    //check whether some data is pending in Serial S
+    /**
+     * @brief Check if there is data pending in HardwareSerial object attached to this server.
+     * 
+     * @return True if there is data pending.
+     */
     bool available() const;
 
+    /**
+     * @brief Set that device can't respond right now.
+     */
     void setBusy() { busy = 0; }
+
+    /**
+     * @brief Set that device is available for communication.
+     */
     void setIdle() { busy = 1; }
 
-    //enable CRC in request/response/exception frames
+    /**
+     * @brief Enable CRC for read/write frames.
+     */
     void enableCRC() { crcDisabled = 0; }
 
-    //disable CRC in request/response/exception frames
+    /**
+     * @brief Disable CRC for read/write frames. 
+     */
     void disableCRC() { crcDisabled = 1; }
 
-    //use standard serial
+    /**
+     * @brief Set that device uses single master - single slave method of communication.
+     */
     void useUART();
 
-    //when bool in passed function is true, RS485 converte act as transmitter
+    /**
+     * @brief Set that device uses single master - multiple slave method of communication.
+     * 
+     * @param actAsTransmitter Pointer to function which turns slave device into transmitter if true is passed as an agrument and into receiver if false is passed.
+     */
     void useRS485(void (*actAsTransmitter_)(bool));
 
-    //read coil or input state
-    //mode INPUT to read coil
-    //mode OUTPUT to read input
-    //because coil is an input for arduino server and output for the client
-    //and input is an output for arduino server and input for the client
+    /** 
+     * @brief Read state of an input or a coil.
+     * 
+     * @param type INPUT for value that can be changed by clients or this server (coils), OUTPUT for value that can be changed only by this server (inputs) .
+     * @param addr Address of coil or input to be read.
+     * @return State of an input or a coil.
+     */
     bool digitalRead(bool type, uint16_t addr);
 
-    //write inputs only
-    //input is an output for arduino server and input for the client
+    /**
+     * @brief Write input or a coil.
+     * 
+     * @param type INPUT for value that can be changed by clients or this server (coils), OUTPUT for value that can be changed only by this server (inputs) .
+     * @param addr Address of input or coil to be written.
+     * @param val Boolean value to be written.
+     */
     void digitalWrite(bool type, uint16_t addr, bool val);
 
-    //read holding register or input register
-    //mode INPUT to read holding register
-    //mode OUTPUT to read input register
-    //because holding register is an input for arduino server and output for the client
-    //and input register is an output for arduino server and input for the client
+    /**
+     * @brief Read state of requested register.
+     * 
+     * @param type INPUT for value that can be changed by clients or this server (holding registers), OUTPUT for value that can be changed only by this server (input registers). 
+     * @param addr Address of input or holding register to be read.
+     * @return Value of requested register.
+     */
     uint16_t analogRead(bool type, uint16_t addr);
 
-    //write input registers only
-    //input register is an output for arduino server and input for the client
+    /**
+     * @brief Write value to requested register.
+     * 
+     * @param type INPUT for value that can be changed by clients or this server (holding registers), OUTPUT for value that can be changed only by this server (input registers). 
+     * @param addr Address of input or holding register to be written.
+     */
     void analogWrite(bool type, uint16_t addr, uint16_t val);
 
     //MODBUS naming convention for functions
+    /**
+     * @brief Write state to a coil.
+     * 
+     * @param address Address of a coil.
+     * @param value Value to be written.
+     */
     void writeCoil(uint16_t address, bool value) { digitalWrite(INPUT, address, value); }
-    void writeHoldingRegister(uint16_t address, uint16_t value) { analogWrite(INPUT, address, value); }
-    void writeInput(uint16_t address, bool value) { digitalWrite(OUTPUT, address, value); }
-    void writeInputRegister(uint16_t address, uint16_t value) { analogWrite(OUTPUT, address, value); }
-    bool readCoil(uint16_t address) { digitalRead(INPUT, address); }
-    bool readInput(uint16_t address) { digitalRead(OUTPUT, address); }
-    uint16_t readHoldingRegister(uint16_t address) { analogRead(INPUT, address); }
-    uint16_t readInputRegister(uint16_t address) { analogRead(OUTPUT, address); } //same as analogRead(OUTPUT, address);
 
-    //read data from Serial S and process it
-    //returns function code when data was successfully processed
-    //returns 0 when there was no data / error occured / invalid request happened
+    /**
+     * @brief Write value to holding register.
+     * 
+     * @param address Address of a holding register.
+     * @param value Value to be written.
+     */
+    void writeHoldingRegister(uint16_t address, uint16_t value) { analogWrite(INPUT, address, value); }
+
+    /**
+     * @brief Write value to a input.
+     * 
+     * @param address Address of an input.
+     * @param value Value to be written.
+     */
+    void writeInput(uint16_t address, bool value) { digitalWrite(OUTPUT, address, value); }
+
+    /**
+     * @brief Write value to a input register.
+     * 
+     * @param address Address of an input register.
+     * @param value Value to be written.
+     */
+    void writeInputRegister(uint16_t address, uint16_t value) { analogWrite(OUTPUT, address, value); }
+
+    /**
+     * @brief Read state of a coil.
+     * 
+     * @param address Address of a coil.
+     * @return State of a coil.
+     */
+    bool readCoil(uint16_t address) { digitalRead(INPUT, address); }
+
+    /**
+     * @brief Read state of an input.
+     * 
+     * @param address Address of an input.
+     * @return State of an input.
+     */
+    bool readInput(uint16_t address) { digitalRead(OUTPUT, address); }
+
+    /**
+     * @brief Read state of a holding register.
+     * 
+     * @param address Address of a holding register.
+     * @return State of a holding register.
+     */
+    uint16_t readHoldingRegister(uint16_t address) { analogRead(INPUT, address); }
+
+    /**
+     * @brief Read state of an input register.
+     * 
+     * @param address Address of an input register.
+     * @return State of an input register.
+     */
+    uint16_t readInputRegister(uint16_t address) { analogRead(OUTPUT, address); }
+
+    /**
+     * @brief Read and process data received from client device.
+     * 
+     * @returns MODBUS function code if data successfully processed or 0 if there was no data, error occured or invalid request happened.
+     */
     uint8_t read();
 };
 
@@ -157,7 +257,7 @@ void MSlave<DQSize, DISize, AQSize, AISize>::sendResponse(uint8_t tab[], uint16_
         S->write(lcrc);
         S->write(hcrc);
     }
-    //TODO: add wait for transfer complete here
+
     if (!uartUsed && actAsTransmitter != nullptr)
         actAsTransmitter(false); //use function given by user to toggle rs485 into receiver
 }
@@ -627,12 +727,12 @@ uint8_t MSlave<DQSize, DISize, AQSize, AISize>::read()
         return 0; //return nothing processed if other slave was adressed
     }
 
-    if (busy)//server is busy so ignore command
+    if (busy) //server is busy so ignore command
     {
         uint8_t tab[3] = {command[MODBUS_ID], toError(command[MODBUS_FUNCTION_CODE]), MODBUS_ERR_SLAVE_BUSY};
         sendResponse(tab, 3);
         S->flush();
-        return 0;//return nothing processed if server is busy
+        return 0; //return nothing processed if server is busy
     }
 
     //check if data contains minimal amount of bytes for given command (without crc)
