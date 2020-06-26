@@ -1,6 +1,6 @@
-# MODBUS-Slave-for-Arduino
+# MODBUS-Slave-Cpp
 
-This library turns Arduino board into MODBUS server device capable of responding to eight basic RTU frames:
+This library turns devices that support HardwareSerial directly (Arduino) or via HAL (unix TODO, windows TODO) into MODBUS server device capable of responding to eight basic RTU frames:
 + Read coil status (0x01)
 + Read input status (0x02)
 + Read holding register(0x03)
@@ -18,7 +18,7 @@ The library expects full RTU frames consisting of:
 
 Also, the library is able to detect invalid request frame and respond to it with an adequate exception frame.<br />
 <br />
-*CRC can be disabled <br />
+*CRC can be disabled i.e for socket communication<br />
 <br />
 
 ## Usage
@@ -38,7 +38,7 @@ MSlave;
 void begin(uint8_t id, HardwareSerial S);
 ```
 + **id:** Unique id of the server <br />
-+ **S:** Arduino's HardwareSerial object <br />
++ **S:** HardwareSerial object <br />
 <br />
 
 ### Stop MODBUS server
@@ -160,7 +160,7 @@ void setup()
 ```
 <br />
 
-## Example
+## Example for Arduino
 ```cpp
 #include "MSlave.h"
 
