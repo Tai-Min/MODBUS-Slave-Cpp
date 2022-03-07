@@ -173,7 +173,7 @@ public:
      * @param address Address of a coil.
      * @return State of a coil.
      */
-    bool readCoil(uint16_t address) { digitalRead(INPUT, address); }
+    bool readCoil(uint16_t address) { return digitalRead(INPUT, address); }
 
     /**
      * @brief Read state of an input.
@@ -181,7 +181,7 @@ public:
      * @param address Address of an input.
      * @return State of an input.
      */
-    bool readInput(uint16_t address) { digitalRead(OUTPUT, address); }
+    bool readInput(uint16_t address) { return digitalRead(OUTPUT, address); }
 
     /**
      * @brief Read state of a holding register.
@@ -189,7 +189,7 @@ public:
      * @param address Address of a holding register.
      * @return State of a holding register.
      */
-    uint16_t readHoldingRegister(uint16_t address) { analogRead(INPUT, address); }
+    uint16_t readHoldingRegister(uint16_t address) { return analogRead(INPUT, address); }
 
     /**
      * @brief Read state of an input register.
@@ -197,7 +197,7 @@ public:
      * @param address Address of an input register.
      * @return State of an input register.
      */
-    uint16_t readInputRegister(uint16_t address) { analogRead(OUTPUT, address); }
+    uint16_t readInputRegister(uint16_t address) { return analogRead(OUTPUT, address); }
 
     /**
      * @brief Read and process data received from client device.
