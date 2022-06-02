@@ -1,6 +1,6 @@
 # MODBUS-Slave-Cpp
 
-This library turns devices that support HardwareSerial directly (Arduino) or via HAL (unix TODO, windows TODO) into MODBUS server device capable of responding to eight basic RTU frames:
+This library turns devices that support HardwareSerial directly (Arduino) or via HAL into MODBUS server device capable of responding to eight basic RTU frames:
 + Read coil status (0x01)
 + Read input status (0x02)
 + Read holding register(0x03)
@@ -211,6 +211,46 @@ Note: values in frames below are raw bytes, not ascii characters so you should u
 |id  |function|address of the first input|quantity of inputs to read  |
 |:--:|:------:|:-----:|:---------------------------------------------:|
 | 1 | 4 | 0 0 | 0 2                                                   |
+
+## Non Arduino devices
+This was not testes as of yet.
+
+For other devices that don't support Arduino.h library, a pure abstract HardwareSerial class must be inherited by custom Serial implementation.
+
+```cpp
+class HardwareSerial
+{
+public:
+    /**
+     * @brief Write single byte to serial device.
+     *
+     * @param byte Byte to write.
+     */
+    virtual void write(uint8_t byte) = 0;
+
+    /**
+     * @brief Check serial port for unread data.
+     *
+     * @return Number of bytes available to read.
+     */
+    virtual int available() = 0;
+
+    /**
+     * @brief Read bytes.
+     *
+     * @param buffer Buffer to place bytes in.
+     * @param length Size of the buffer.
+     * @return Number of bytes placed in the buffer.
+     */
+    virtual size_t readBytes(uint8_t *buffer, size_t length) = 0;
+
+    /**
+     * @brief Wait for tx tramsmission to complete.
+     */
+    virtual void flush() = 0;
+};
+```
+
 ## About
 The library was written using following documents and sites:
 + MODBUS over Serial Line Specification and Implementation Guide V1.02

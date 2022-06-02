@@ -1,8 +1,43 @@
 #ifndef MSLAVE_H
 #define MSLAVE_H
 
-#include <Arduino.h>
 #include "mdefines.h"
+
+#ifdef ARDUINO
+#include <Arduino.h>
+#else
+class HardwareSerial
+{
+public:
+    /**
+     * @brief Write single byte to serial device.
+     *
+     * @param byte Byte to write.
+     */
+    virtual void write(uint8_t byte) = 0;
+
+    /**
+     * @brief Check serial port for unread data.
+     *
+     * @return Number of bytes available to read.
+     */
+    virtual int available() = 0;
+
+    /**
+     * @brief Read bytes.
+     *
+     * @param buffer Buffer to place bytes in.
+     * @param length Size of the buffer.
+     * @return Number of bytes placed in the buffer.
+     */
+    virtual size_t readBytes(uint8_t *buffer, size_t length) = 0;
+
+    /**
+     * @brief Wait for tx tramsmission to complete.
+     */
+    virtual void flush() = 0;
+};
+#endif
 
 // <coil, input, holding register, input register>
 template <uint16_t DQSize, uint16_t DISize, uint16_t AQSize, uint16_t AISize>
@@ -224,14 +259,14 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
     uint8_t byteCount = quantity / MODBUS_BYTE; // Number of bytes to iterate over to read bits.
     if (quantity % MODBUS_BYTE != 0)            // Quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits.
         byteCount++;
-    uint8_t outputs[byteCount];
 
+    uint8_t resp[3 + byteCount];
     for (uint8_t i = 0; i < byteCount; i++) // Read one byte.
     {
-        outputs[i] = 0;
+        resp[i + 3] = 0;
         for (uint8_t j = 0; j < MODBUS_BYTE; j++) // Read all bits in one byte.
         {
-            outputs[i] |= (DQ[currentAddr] << j); // Push specified bit to current byte of output buffer.
+            resp[i + 3] |= (DQ[currentAddr] << j); // Push specified bit to current byte of output buffer.
 
             currentAddr++;
             if (currentAddr - addr >= quantity) // Check if every selected output has been read and if so stop iterating.
@@ -240,15 +275,10 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readCoilStatus(uint8_t id, uint8_t 
     }
 
     // Prepare response.
-    uint8_t tab[3 + byteCount];
-    tab[0] = id;
-    tab[1] = MODBUS_READ_COIL_STATUS;
-    tab[2] = byteCount;
-    for (uint8_t i = 0; i < byteCount; i++)
-    {
-        tab[i + 3] = outputs[i];
-    }
-    sendResponse(tab, byteCount + 3);
+    resp[0] = id;
+    resp[1] = MODBUS_READ_COIL_STATUS;
+    resp[2] = byteCount;
+    sendResponse(resp, byteCount + 3);
     return true;
 }
 
@@ -278,14 +308,14 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
     uint8_t byteCount = quantity / MODBUS_BYTE; // Number of bytes to iterate over to read bits.
     if (quantity % MODBUS_BYTE != 0)            // Quantity is not multiple of 8 so increase byteCount once so it can hold remaining bits.
         byteCount++;
-    uint8_t inputs[byteCount];
 
+    uint8_t resp[3 + byteCount];
     for (uint8_t i = 0; i < byteCount; i++) // Read one byte.
     {
-        inputs[i] = 0;
+        resp[i + 3] = 0;
         for (uint8_t j = 0; j < MODBUS_BYTE; j++) // Push specified bit to output buffer.
         {
-            inputs[i] |= (DI[currentAddr] << j);
+            resp[i + 3] |= (DI[currentAddr] << j);
 
             currentAddr++;
             if (currentAddr - addr >= quantity) // Check if every selected output has been read and if so stop iterating.
@@ -294,15 +324,10 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputStatus(uint8_t id, uint8_t
     }
 
     // Prepare response.
-    uint8_t tab[3 + byteCount];
-    tab[0] = id;
-    tab[1] = MODBUS_READ_INPUT_STATUS;
-    tab[2] = byteCount;
-    for (uint8_t i = 0; i < byteCount; i++)
-    {
-        tab[i + 3] = inputs[i];
-    }
-    sendResponse(tab, byteCount + 3);
+    resp[0] = id;
+    resp[1] = MODBUS_READ_INPUT_STATUS;
+    resp[2] = byteCount;
+    sendResponse(resp, byteCount + 3);
     return true;
 }
 
@@ -328,26 +353,19 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readHoldingRegister(uint8_t id, uin
         return false;
     }
 
-    uint8_t byteCount = quantity * 2; // Quantity is in number of registers (2 bytes per one).
-    uint8_t valL[quantity];
-    uint8_t valH[quantity];
-    for (uint8_t i = 0; i < quantity; i++) // Read every register into two bytes.
+    uint8_t resp[3 + quantity];
+    uint8_t byteCount = quantity * 2;                      // Quantity is in number of registers (2 bytes per one).
+    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++) // Read every register into two bytes.
     {
-        valL[i] = toLowByte(AQ[addr + i]);
-        valH[i] = toHighByte(AQ[addr + i]);
+        resp[i + 3] = toHighByte(AQ[addr + j]);
+        resp[i + 4] = toLowByte(AQ[addr + j]);
     }
 
     // Prepare response.
-    uint8_t tab[3 + quantity];
-    tab[0] = id;
-    tab[1] = MODBUS_READ_HOLDING_REGISTER;
-    tab[2] = byteCount;
-    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++)
-    {
-        tab[i + 3] = valH[j];
-        tab[i + 4] = valL[j];
-    }
-    sendResponse(tab, byteCount + 3);
+    resp[0] = id;
+    resp[1] = MODBUS_READ_HOLDING_REGISTER;
+    resp[2] = byteCount;
+    sendResponse(resp, byteCount + 3);
     return true;
 }
 
@@ -373,26 +391,19 @@ bool MSlave<DQSize, DISize, AQSize, AISize>::readInputRegister(uint8_t id, uint8
         return false;
     }
 
-    uint8_t byteCount = quantity * 2; // Quantity is in number of registers (2 bytes per one).
-    uint8_t valL[quantity];
-    uint8_t valH[quantity];
-    for (uint8_t i = 0; i < quantity; i++) // Read every register into two bytes.
+    uint8_t resp[3 + quantity];
+    uint8_t byteCount = quantity * 2;                      // Quantity is in number of registers (2 bytes per one).
+    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++) // Read every register into two bytes.
     {
-        valL[i] = toLowByte(AI[addr + i]);
-        valH[i] = toHighByte(AI[addr + i]);
+        resp[i + 3] = toHighByte(AI[addr + j]);
+        resp[i + 4] = toLowByte(AI[addr + j]);
     }
 
     // Prepare response.
-    uint8_t tab[3 + quantity];
-    tab[0] = id;
-    tab[1] = MODBUS_READ_INPUT_REGISTER;
-    tab[2] = byteCount;
-    for (uint8_t i = 0, j = 0; i < byteCount; i += 2, j++)
-    {
-        tab[i + 3] = valH[j];
-        tab[i + 4] = valL[j];
-    }
-    sendResponse(tab, byteCount + 3);
+    resp[0] = id;
+    resp[1] = MODBUS_READ_INPUT_REGISTER;
+    resp[2] = byteCount;
+    sendResponse(resp, byteCount + 3);
     return true;
 }
 
