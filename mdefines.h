@@ -3,6 +3,11 @@
 
 #include <HardwareSerial.h>
 
+#define DISCRETE_INPUT 0
+#define COIL 1
+#define INPUT_REG 0
+#define HOLDING_REG 1 
+
 // Config.
 #define MODBUS_BYTE 8
 #define MODBUS_CRC_BYTE_COUNT 2

@@ -18,7 +18,7 @@ The library expects full RTU frames consisting of:
 
 Also, the library is able to detect invalid request frame and respond to it with an adequate exception frame.<br />
 <br />
-*CRC can be disabled i.e for socket communication<br />
+*CRC can be disabled.<br />
 <br />
 
 ## Usage
@@ -63,51 +63,26 @@ This function should be used as often as possible along with available() to prov
 <br />
 
 ### Read from digital/analog input/output array:
-#### 1. Arduino naming convention
 ```cpp
 bool digitalRead(bool type, uint16_t address);
 uint16_t analogRead(bool type, uint16_t address); 
 ```
 + **type:** 
-  - INPUT - Input array / things sent from client devices
-  - OUTPUT - Output array / things written by using digitalWrite or analogWrite function<br />
+  - DISCRETE_INPUT (digital) / INPUT_REG (analog)
+  - COIL (digital) / HOLDING_REG (analog) <br />
 + **address:** Position in specified array <br />
 
 + **returns:** Value stored under given address
 <br />
 
-***
-#### 2. MODBUS naming convention
-```cpp
-bool readCoil(uint16_t address); //same as digitalRead(INPUT, address);
-bool readInput(uint16_t address);//same as digitalRead(OUTPUT, address);
-uint16_t readHoldingRegister(uint16_t address);//same as analogRead(INPUT, address);
-uint16_t readInputRegister(uint16_t address);//same as analogRead(OUTPUT, address);
-```
-+ **address:** Position in specified array <br />
-<br />
-
 ### Write to digital/analog input/output array:
-#### 1. Arduino naming convention
 ```cpp
 void digitalWrite(bool type, uint16_t address, bool value);
 void analogWrite(bool type, uint16_t address, uint16_t value);
 ```
 + **type:** 
-  - INPUT - Input array / things sent from client devices
-  - OUTPUT - Output array / things written by using digitalWrite or analogWrite function<br />
-+ **address:** Position in specified array <br />
-+ **value:** Value to be written<br />
-<br />
-
-***
-#### 2. MODBUS naming convention
-```cpp
-void writeCoil(uint16_t address, bool value);//same as digitalWrite(INPUT, address, value);
-void writeRegister(uint16_t address, uint16_t value);//same as analogWrite(INPUT, address, value);
-void writeInput(uint16_t address, bool value);//same as digitalWrite(OUTPUT, address, value);
-void writeInputRegister(uint16_t address, uint16_t value);//same as analogWrite(OUTPUT, address, value);
-```
+  - DISCRETE_INPUT (digital) / INPUT_REG (analog)
+  - COIL (digital) / HOLDING_REG (analog) <br />
 + **address:** Position in specified array <br />
 + **value:** Value to be written<br />
 <br />
@@ -171,14 +146,14 @@ int buttonPin = 3;
 
 int deviceID = 1;
 
-//1 digital input (address 0)
-//1 digital output (address 0)
-//1 analog input (address 0)
-//2 analog outputs (adresses 0,1)
-//addresses works just like arrays
-//so if you have 2 analog outputs, you can access adresses from 0 to 1
-//if you have 40 analog inputs, you can access adresses from 0 to 39 etc
-MSlave<1, 1, 1, 2> server;//initialize slave device
+// 1 digital input (address 0)
+// 1 digital output (address 0)
+// 1 analog input (address 0)
+// 2 analog outputs (adresses 0,1)
+// addresses works just like arrays
+// so if you have 2 analog outputs, you can access adresses from 0 to 1
+// if you have 40 analog inputs, you can access adresses from 0 to 39 etc
+MSlave<1, 1, 1, 2> server; // Initialize slave device.
 
 void setup()
 {
@@ -186,25 +161,26 @@ void setup()
   pinMode(buttonPin, INPUT);
   pinMode(potPin, INPUT);
   pinMode(pwmLedPin, OUTPUT);
-  server.disableCRC();//no need for crc check in this example
+  server.disableCRC(); // No need for crc check in this example.
   Serial.begin(115200);
   Serial.setTimeout(15);
-  server.begin(deviceID, Serial);//start modbus server
+  server.begin(deviceID, Serial); // Start modbus server.
 }
 
 void loop()
 {
-  if (server.available())//check whether master sent some data
+  if (server.available()) // Check whether master sent some serial data.
   {
-    int result = server.read();//process data from master and return code of the processed function or 0 when there was no data / error occured / invalid request happened
-    digitalWrite(ledPin, server.digitalRead(INPUT, 0));//digitalRead digital inputs array data received from client devices
-    analogWrite(pwmLedPin, server.analogRead(INPUT, 0));//analogRead analog inputs array data received from client devices
-    server.digitalWrite(OUTPUT, 0, digitalRead(buttonPin));//digitalWrite button's state to digital outputs array so it will be available to be read from clients
-    server.analogWrite(OUTPUT, 0, analogRead(potPin));//analogWrite potentiometer's state to analog outputs array so it will be available to be read from clients
-    if(server.digitalRead(OUTPUT, 0))//read buttons's state from digital outputs array
-    {
-      server.analogWrite(OUTPUT, 1, 512);//analogWrite 512 to analog outputs array so it will be available to be read from clients
-    }
+    int result = server.read(); // Process data from master and return code of the processed function or 0 when there was no data / error occured / invalid request happened.
+    digitalWrite(ledPin, server.digitalRead(COIL, 0)); // Read digital inputs array data received from client devices.
+    analogWrite(pwmLedPin, server.analogRead(HOLDING_REG, 0)); // Read analog inputs array data received from client devices.
+    server.digitalWrite(DISCRETE_INPUT, 0, digitalRead(buttonPin)); // Write button's state to digital outputs array so it will be available to be read from clients.
+    server.analogWrite(INPUT_REG, 0, analogRead(potPin)); // Write potentiometer's state to analog outputs array so it will be available to be read from clients.
+
+    if (server.digitalRead(DISCRETE_INPUT, 0)) // Read buttons's state from digital outputs array.
+      server.analogWrite(INPUT_REG, 1, 512); // Write 512 to analog outputs array so it will be available to be read from clients.
+    else
+      server.analogWrite(INPUT_REG, 1, 100); // Write 100 to analog outputs array so it will be available to be read from clients.
   }
 }
 ```
