@@ -213,7 +213,7 @@ Note: values in frames below are raw bytes, not ascii characters so you should u
 | 1 | 4 | 0 0 | 0 2                                                   |
 
 ## Non Arduino devices
-This was not testes as of yet.
+This was not tested as of yet.
 
 For other devices that don't support Arduino.h library, a pure abstract HardwareSerial class must be inherited by custom Serial implementation.
 
